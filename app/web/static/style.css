@@ -1,21 +1,77 @@
-:root { --pri: #6d28d9; --bg: #f5f3ff; --txt: #1e1b2e; }
+/* Estila · tema empresarial */
+:root {
+  --marino: #14273f;
+  --marino-2: #1d3a5c;
+  --primario: #1f5fa8;
+  --primario-osc: #184b85;
+  --fondo: #edf0f4;
+  --tarjeta: #ffffff;
+  --borde: #d9e0e8;
+  --texto: #26313f;
+  --gris: #5b6b7c;
+  --ok: #1e7e46;
+  --err: #b3261e;
+}
 * { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--txt); }
-.top { display: flex; justify-content: space-between; align-items: center; background: var(--pri); color: #fff; padding: 12px 18px; }
-.top a { color: #fff; }
-.marca { font-weight: 700; font-size: 1.2rem; }
-.menu { display: flex; gap: 6px; flex-wrap: wrap; background: #ede9fe; padding: 8px 18px; }
-.menu a { text-decoration: none; background: #fff; color: var(--pri); padding: 8px 14px; border-radius: 8px; font-weight: 600; }
-main { padding: 18px; max-width: 1000px; margin: auto; }
-.tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-.tarjeta { background: #fff; border-radius: 12px; padding: 18px; text-decoration: none; color: var(--txt); box-shadow: 0 1px 4px #0002; }
-.tarjeta h3 { margin: 0 0 6px; color: var(--pri); }
-.tarjeta.prox { opacity: .55; }
-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; }
-th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
-form.card { background: #fff; padding: 16px; border-radius: 12px; margin: 16px 0; display: grid; gap: 10px; max-width: 560px; }
-input, select, button { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
-button { background: var(--pri); color: #fff; border: none; cursor: pointer; font-weight: 700; }
-.error { background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 8px; }
-.login-wrap { max-width: 420px; margin: 8vh auto; }
-.login-wrap h1 { color: var(--pri); }
+body { margin: 0; font-family: "Segoe UI", system-ui, Roboto, Arial, sans-serif; background: var(--fondo); color: var(--texto); font-size: 15px; }
+
+/* --- Estructura con barra lateral --- */
+.app { display: flex; min-height: 100vh; }
+.lateral { width: 236px; flex-shrink: 0; background: var(--marino); color: #dbe4ee; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+.lateral .marca { padding: 20px 18px 6px; font-size: 1.35rem; font-weight: 700; color: #fff; letter-spacing: .02em; }
+.lateral .negocio { padding: 0 18px 14px; font-size: .8rem; color: #9fb2c8; border-bottom: 1px solid #ffffff22; }
+.lateral nav { display: flex; flex-direction: column; padding: 12px 10px; gap: 2px; }
+.lateral nav a { color: #dbe4ee; text-decoration: none; padding: 10px 12px; border-radius: 6px; font-weight: 600; }
+.lateral nav a:hover { background: var(--marino-2); }
+.contenido { flex: 1; min-width: 0; }
+.barra { display: flex; justify-content: space-between; align-items: center; background: var(--tarjeta); border-bottom: 1px solid var(--borde); padding: 12px 22px; }
+.barra .quien { color: var(--gris); }
+.barra a { color: var(--primario); font-weight: 600; }
+main { padding: 22px; max-width: 1080px; }
+h2 { margin: 4px 0 4px; font-size: 1.4rem; }
+h3 { margin-top: 26px; font-size: .85rem; text-transform: uppercase; letter-spacing: .06em; color: var(--gris); }
+.sub { color: var(--gris); margin-top: 0; }
+
+/* --- Tarjetas --- */
+.tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+.tarjeta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 6px; padding: 16px 18px; text-decoration: none; color: var(--texto); }
+a.tarjeta:hover { border-color: var(--primario); }
+.tarjeta h3 { margin: 0 0 4px; color: var(--primario); font-size: 1rem; text-transform: none; letter-spacing: 0; }
+.tarjeta p { margin: 0; color: var(--gris); font-size: .9rem; }
+.tarjeta.prox { background: #f6f8fa; }
+.tarjeta .etiqueta { display: inline-block; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--gris); background: #e7ecf1; border-radius: 4px; padding: 2px 8px; margin-top: 8px; }
+
+/* --- Tablas --- */
+table { width: 100%; border-collapse: collapse; background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 6px; overflow: hidden; font-size: .93rem; }
+th, td { padding: 10px 12px; border-bottom: 1px solid var(--borde); text-align: left; }
+th { background: #f0f3f7; color: #42526b; text-transform: uppercase; font-size: .72rem; letter-spacing: .05em; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: #f7fafc; }
+
+/* --- Formularios --- */
+form.card { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 6px; padding: 18px; margin: 16px 0; display: grid; gap: 12px; max-width: 560px; }
+label { display: grid; gap: 6px; font-weight: 600; font-size: .9rem; }
+input, select { padding: 9px 10px; border-radius: 6px; border: 1px solid var(--borde); font-size: .95rem; color: var(--texto); background: #fff; }
+input:focus, select:focus { outline: 2px solid #bcd3ec; border-color: var(--primario); }
+button { padding: 10px 16px; border-radius: 6px; border: none; font-size: .95rem; background: var(--primario); color: #fff; cursor: pointer; font-weight: 700; }
+button:hover { background: var(--primario-osc); }
+.btn-peligro { background: #fff; color: var(--err); border: 1px solid var(--err); padding: 6px 10px; font-size: .82rem; }
+.btn-peligro:hover { background: var(--err); color: #fff; }
+.error { background: #fdecea; color: var(--err); border: 1px solid #f5c6c2; padding: 10px 12px; border-radius: 6px; }
+
+/* --- Login --- */
+.login-fondo { background: linear-gradient(135deg, var(--marino) 0%, var(--marino-2) 60%, #2c5a8f 100%); min-height: 100vh; display: flex; }
+.login-wrap { max-width: 400px; margin: auto; width: 100%; padding: 20px; }
+.login-marca { color: #fff; text-align: center; margin-bottom: 14px; }
+.login-marca h1 { margin: 0; font-size: 2rem; letter-spacing: .03em; }
+.login-marca p { margin: 4px 0 0; color: #b9c8da; }
+.login-wrap form.card { max-width: none; margin: 0; box-shadow: 0 8px 28px #0006; }
+
+@media (max-width: 760px) {
+  .app { flex-direction: column; }
+  .lateral { width: 100%; height: auto; position: static; }
+  .lateral nav { flex-direction: row; flex-wrap: wrap; }
+  .contenido { min-width: 0; }
+  main { padding: 14px; }
+  table { font-size: .85rem; }
+}

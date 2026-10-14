@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% block titulo %}Panel · Estila{% endblock %}
 {% block contenido %}
-<h2>Hola, {{ usuario.nombre }}</h2>
-<p>Rol: <b>{{ ctx.rol }}</b> · Negocio: <b>{{ tenant_nombre }}</b></p>
+<h2>Panel principal</h2>
+<p class="sub">{{ usuario.nombre }} · Rol: <b>{{ ctx.rol }}</b> · {{ tenant_nombre }}</p>
 <h3>Mis opciones</h3>
 <div class="tarjetas">
   {% for nombre, url in menu %}
   <a class="tarjeta" href="{{ url }}"><h3>{{ nombre }}</h3><p>Abrir</p></a>
   {% endfor %}
 </div>
-<h3>Próximamente</h3>
+<h3>Módulos en desarrollo</h3>
 <div class="tarjetas">
-  <div class="tarjeta prox"><h3>Punto de venta</h3><p>Cobros y SIFEN</p></div>
-  <div class="tarjeta prox"><h3>Caja</h3><p>Apertura y cierre</p></div>
-  <div class="tarjeta prox"><h3>Comisiones</h3><p>Liquidación</p></div>
-  <div class="tarjeta prox"><h3>Inventario</h3><p>Kárdex y vitrina</p></div>
-  <div class="tarjeta prox"><h3>Reportes</h3><p>Panel gerencial</p></div>
+  <div class="tarjeta prox"><h3>Punto de venta</h3><p>Cobros y facturación SIFEN</p><span class="etiqueta">Próximo</span></div>
+  <div class="tarjeta prox"><h3>Caja</h3><p>Apertura, arqueo y cierre</p><span class="etiqueta">Próximo</span></div>
+  <div class="tarjeta prox"><h3>Comisiones</h3><p>Liquidación por profesional</p><span class="etiqueta">Próximo</span></div>
+  <div class="tarjeta prox"><h3>Inventario</h3><p>Kárdex y vitrina en línea</p><span class="etiqueta">Próximo</span></div>
+  <div class="tarjeta prox"><h3>Reportes</h3><p>Panel gerencial</p><span class="etiqueta">Próximo</span></div>
 </div>
 {% endblock %}

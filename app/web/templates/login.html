@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block titulo %}Entrar · Estila{% endblock %}
-{% block contenido %}
+{% block login %}
 <div class="login-wrap">
-  <h1>Estila</h1>
-  <p>Gestión integral para peluquerías y barberías</p>
-  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <div class="login-marca">
+    <h1>Estila</h1>
+    <p>Gestión integral para peluquerías y barberías</p>
+  </div>
   <form class="card" method="post" action="/login">
-    <label>Correo<input type="email" name="email" required></label>
-    <label>Contraseña<input type="password" name="password" required></label>
-    <button type="submit">Entrar</button>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <label>Correo electrónico<input type="email" name="email" required autocomplete="username"></label>
+    <label>Contraseña<input type="password" name="password" required autocomplete="current-password"></label>
+    <button type="submit">Ingresar</button>
   </form>
 </div>
 {% endblock %}

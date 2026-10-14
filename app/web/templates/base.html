@@ -6,19 +6,29 @@
 <title>{% block titulo %}Estila{% endblock %}</title>
 <link rel="stylesheet" href="/static/style.css">
 </head>
+{% if usuario %}
 <body>
-<header class="top">
-  <div class="marca">Estila · {{ tenant_nombre }}</div>
-  {% if usuario %}
-  <div>{{ usuario.nombre }} ({{ ctx.rol }}) · <a href="/logout">Salir</a></div>
-  {% endif %}
-</header>
-{% if menu %}
-<nav class="menu">
-  <a href="/panel">Inicio</a>
-  {% for nombre, url in menu %}<a href="{{ url }}">{{ nombre }}</a>{% endfor %}
-</nav>
-{% endif %}
-<main>{% block contenido %}{% endblock %}</main>
+<div class="app">
+  <aside class="lateral">
+    <div class="marca">Estila</div>
+    <div class="negocio">{{ tenant_nombre }}</div>
+    <nav>
+      <a href="/panel">Inicio</a>
+      {% for nombre, url in menu %}<a href="{{ url }}">{{ nombre }}</a>{% endfor %}
+    </nav>
+  </aside>
+  <div class="contenido">
+    <header class="barra">
+      <div><b>{{ tenant_nombre }}</b></div>
+      <div class="quien">{{ usuario.nombre }} · {{ ctx.rol }} · <a href="/logout">Cerrar sesión</a></div>
+    </header>
+    <main>{% block contenido %}{% endblock %}</main>
+  </div>
+</div>
 </body>
+{% else %}
+<body class="login-fondo">
+{% block login %}{% endblock %}
+</body>
+{% endif %}
 </html>

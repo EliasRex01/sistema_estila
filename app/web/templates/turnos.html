@@ -11,7 +11,7 @@
   <td>{% if t.estado != "CANCELADO" and puede_gestionar %}
     <form method="post" action="/ui/turnos/{{ t.id }}/cancelar" style="display:inline">
       <input name="motivo" placeholder="Motivo" required size="12">
-      <button type="submit">Cancelar</button>
+      <button type="submit" class="btn-peligro">Cancelar</button>
     </form>{% endif %}</td>
 </tr>
 {% endfor %}
