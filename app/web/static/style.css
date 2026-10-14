@@ -57,6 +57,16 @@ button { padding: 10px 16px; border-radius: 6px; border: none; font-size: .95rem
 button:hover { background: var(--primario-osc); }
 .btn-peligro { background: #fff; color: var(--err); border: 1px solid var(--err); padding: 6px 10px; font-size: .82rem; }
 .btn-peligro:hover { background: var(--err); color: #fff; }
+.btn-secundario { background: #fff; color: var(--primario); border: 1px solid var(--primario); }
+.btn-secundario:hover { background: var(--azul-claro); }
+.btn-icono { background: none; border: none; padding: 2px; cursor: pointer; }
+.col-icono { width: 30px; text-align: center; }
+.barra-pagina { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.barra-pagina h2 { margin-bottom: 0; }
+.paginacion { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: 10px; }
+.paginacion .pags { display: flex; gap: 8px; align-items: center; }
+.paginacion a { color: var(--primario); text-decoration: none; font-weight: 600; }
+.paginacion .rango { color: var(--gris); font-size: .9rem; }
 .error { background: #fdecea; color: var(--err); border: 1px solid #f5c6c2; padding: 10px 12px; border-radius: 6px; }
 
 /* --- Login --- */

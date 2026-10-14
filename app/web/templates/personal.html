@@ -1,22 +1,41 @@
 {% extends "base.html" %}
 {% block titulo %}Personal · Estila{% endblock %}
 {% block contenido %}
-<h2>Personal</h2>
-<p class="sub">Altas, edición y bajas (la baja desactiva sin borrar el historial)</p>
+<div class="barra-pagina">
+  <div>
+    <h2>Personal</h2>
+    <p class="sub">Altas, edición y bajas (la baja desactiva sin borrar el historial)</p>
+  </div>
+  <div><button type="button" id="btn-incluir" onclick="document.getElementById('form-alta').style.display='block';this.style.display='none'">+ Incluir</button></div>
+</div>
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
+<div id="form-alta" style="display:none">
+  <h3>Alta de personal</h3>
+  <form class="card" method="post" action="/ui/personal">
+    <input name="nombre" placeholder="Nombre" required>
+    <input name="email" type="email" placeholder="Correo" required>
+    <input name="password" type="password" placeholder="Contraseña (8+)" required>
+    <select name="rol"><option>ESTILISTA</option><option>RECEPCION</option><option>ADMIN</option></select>
+    <input name="comision_default_pct" type="number" step="0.01" min="0" max="100" value="0">
+    <div>
+      <button type="submit">Guardar</button>
+      <button type="button" class="btn-secundario" onclick="document.getElementById('form-alta').style.display='none';document.getElementById('btn-incluir').style.display=''">Cancelar</button>
+    </div>
+  </form>
+</div>
 <table>
-<tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Comisión %</th><th>Estado</th><th>Acciones</th></tr>
-{% for u in filas %}<tr><td>{{ u.nombre }}</td><td>{{ u.email }}</td><td>{{ u.rol }}</td><td>{{ u.comision_default_pct }}</td><td>{{ "Activo" if u.activo else "Inactivo" }}</td>
-<td><a href="/ui/personal/{{ u.id }}/editar">Editar</a>
-{% if u.activo %}<form method="post" action="/ui/personal/{{ u.id }}/eliminar" style="display:inline" onsubmit="return confirm('¿Desactivar a {{ u.nombre }}?')"> <button type="submit" class="btn-peligro">Desactivar</button></form>{% endif %}</td></tr>{% endfor %}
+<tr><th></th><th></th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Comisión %</th><th>Estado</th></tr>
+{% for u in filas %}<tr>
+<td class="col-icono"><a href="/ui/personal/{{ u.id }}/editar" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1f5fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg></a></td>
+<td class="col-icono">{% if u.activo %}<form method="post" action="/ui/personal/{{ u.id }}/eliminar" style="display:inline" onsubmit="return confirm('¿Desactivar a {{ u.nombre }}?')"><button type="submit" class="btn-icono" title="Desactivar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b3261e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6"/></svg></button></form>{% endif %}</td>
+<td>{{ u.nombre }}</td><td>{{ u.email }}</td><td>{{ u.rol }}</td><td>{{ u.comision_default_pct }}</td><td>{{ "Activo" if u.activo else "Inactivo" }}</td></tr>{% endfor %}
 </table>
-<h3>Alta de personal</h3>
-<form class="card" method="post" action="/ui/personal">
-  <input name="nombre" placeholder="Nombre" required>
-  <input name="email" type="email" placeholder="Correo" required>
-  <input name="password" type="password" placeholder="Contraseña (8+)" required>
-  <select name="rol"><option>ESTILISTA</option><option>RECEPCION</option><option>ADMIN</option></select>
-  <input name="comision_default_pct" type="number" step="0.01" min="0" max="100" value="0">
-  <button type="submit">Guardar</button>
-</form>
+<div class="paginacion">
+  <div class="pags">
+    {% if pag > 1 %}<a href="/ui/personal?pag={{ pag - 1 }}">‹ Anterior</a>{% endif %}
+    {% for p in pags %}{% if p == pag %}<b>{{ p }}</b>{% else %}<a href="/ui/personal?pag={{ p }}">{{ p }}</a>{% endif %}{% endfor %}
+    {% if pag < total_pags %}<a href="/ui/personal?pag={{ pag + 1 }}">Siguiente ›</a>{% endif %}
+  </div>
+  <div class="rango">{{ desde }} a {{ hasta }} de {{ total }}</div>
+</div>
 {% endblock %}

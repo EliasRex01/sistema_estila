@@ -80,13 +80,25 @@ def panel(request: Request, db: Session = Depends(get_db)):
 
 # --- Personal (ADMIN) ---
 @router.get("/ui/personal")
-def personal_get(request: Request, db: Session = Depends(get_db), error: str = ""):
+def personal_get(request: Request, db: Session = Depends(get_db), error: str = "", pag: int = 1):
     ctx, red = exigir(request, "ADMIN")
     if red:
         return red
     set_rls_tenant(db, ctx["tenant_id"])
-    filas = db.query(models.UsuarioPersonal).filter_by(tenant_id=ctx["tenant_id"]).all()
-    return templates.TemplateResponse(request, "personal.html", {**shell(db, ctx), "filas": filas, "error": error})
+    POR_PAG = 10
+    base = db.query(models.UsuarioPersonal).filter_by(tenant_id=ctx["tenant_id"]).order_by(models.UsuarioPersonal.nombre)
+    total = base.count()
+    total_pags = max((total + POR_PAG - 1) // POR_PAG, 1)
+    pag = min(max(pag, 1), total_pags)
+    filas = base.offset((pag - 1) * POR_PAG).limit(POR_PAG).all()
+    desde = (pag - 1) * POR_PAG + 1 if total else 0
+    hasta = min(pag * POR_PAG, total)
+    ini = max(pag - 3, 1)
+    fin = min(ini + 6, total_pags)
+    ini = max(fin - 6, 1)
+    return templates.TemplateResponse(request, "personal.html", {
+        **shell(db, ctx), "filas": filas, "error": error, "pag": pag, "total": total,
+        "desde": desde, "hasta": hasta, "total_pags": total_pags, "pags": list(range(ini, fin + 1))})
 
 
 @router.post("/ui/personal")
