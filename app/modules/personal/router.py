@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.security import hash_password
 from app.core.tenant import require_roles
 from app.db import models
-from app.db.session import get_db, set_rls_tenant
+from app.db.session import auth_mode, get_db, set_rls_tenant
 from app.modules.personal.schemas import PersonalCreate, PersonalOut
 
 router = APIRouter(prefix="/personal", tags=["personal"])
@@ -24,8 +24,10 @@ def crear(
     ctx: dict = Depends(require_roles("ADMIN")),
 ):
     set_rls_tenant(db, ctx["tenant_id"])
-    if db.query(models.UsuarioPersonal).filter_by(email=body.email).first():
-        raise HTTPException(409, "Email ya existe")
+    # Unicidad global de email (el login no conoce el tenant todavia).
+    with auth_mode(db):
+        if db.query(models.UsuarioPersonal).filter_by(email=body.email).first():
+            raise HTTPException(409, "Email ya existe")
     u = models.UsuarioPersonal(
         tenant_id=ctx["tenant_id"], nombre=body.nombre, email=body.email,
         password_hash=hash_password(body.password), rol=body.rol,

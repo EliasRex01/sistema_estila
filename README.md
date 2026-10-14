@@ -1,6 +1,9 @@
 # Estila — SaaS Multitenant Peluquerias/Barberias (MVP base)
 
-Piloto: Arselia Beauty Center. Alcance MVP: RF01 tenants + RF02 auth/roles + RLS + CRUD personal/clientes/servicios/turnos.
+Piloto: Arselia Beauty Center. Alcance MVP: RF01 tenants + RF02 auth/roles + VPD + CRUD personal/clientes/servicios/turnos.
+
+Stack: FastAPI + **Oracle** (ADB Always Free en nube / SQLite en dev) + Jinja2.
+Despliegue: ver `DEPLOY_ORACLE.md` (producción) y `DEPLOY_VERCEL.md` (pruebas).
 
 ## Arranque dev (PowerShell)
 
@@ -13,8 +16,8 @@ py -m app.db.init_db
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8001
 ```
 
-Prod Postgres: `docker compose up -d db` luego `DATABASE_URL=postgresql+psycopg2://estila:estila@localhost:5433/estila`
-y aplicar `sql/rls.sql` con psql tras el primer arranque.
+Oracle local: `docker compose up -d db` luego `DATABASE_URL=oracle+oracledb://system:EstilaLocal123@localhost:1521/FREEPDB1`
+(tras `init_db`, aplicar `sql/vpd_oracle.sql` como SYSTEM). Nube: ver `DEPLOY_ORACLE.md`.
 
 ## Interfaz web
 
@@ -32,9 +35,12 @@ Páginas en `/ui/...` (el API JSON sigue en `/personal`, `/clientes`, etc. y en 
 2. `POST /auth/login` {email, password} -> JWT con tenant_id + rol. Usar header `Authorization: Bearer` + `X-Tenant-ID`.
 3. `POST /personal`, `/clientes`, `/servicios`, `/turnos`. Solapamiento da 409. Cancelar pide motivo. `GET /clientes/sin-turno` para RF09.
 
-## RLS (RNF02)
+## Aislamiento por tenant (RNF02)
 
-Toda tabla operativa tiene `tenant_id`. `session.set_rls_tenant` fija `SET LOCAL app.tenant_id` y `sql/rls.sql` crea politicas. En SQLite dev el aislamiento es por `filter_by(tenant_id)` en routers + check header-vs-token en `core/tenant.py`.
+Toda tabla operativa tiene `tenant_id`. `session.set_rls_tenant` fija el contexto
+(VPD en Oracle, RLS legado en Postgres). En SQLite dev el aislamiento es por
+`filter_by(tenant_id)` en routers + check header-vs-token en `core/tenant.py`.
+En Oracle además: login/alta usan `auth_mode()` y el pool limpia el contexto.
 
 ## Roadmap (anteproyecto)
 

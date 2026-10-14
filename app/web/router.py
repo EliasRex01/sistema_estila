@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import create_access_token, hash_password, verify_password
 from app.db import models
-from app.db.session import get_db, set_rls_tenant
+from app.db.session import auth_mode, get_db, set_rls_tenant
 from app.modules.clientes.service import validar_ci_ruc_py
 from app.modules.turnos.service import calcular_fin, validar_no_solapamiento
 from app.web.deps import menu_para, ui_ctx
@@ -53,7 +53,8 @@ def login_get(request: Request, error: str = ""):
 
 @router.post("/login")
 def login_post(request: Request, email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
-    u = db.query(models.UsuarioPersonal).filter_by(email=email.strip(), activo=1).first()
+    with auth_mode(db):
+        u = db.query(models.UsuarioPersonal).filter_by(email=email.strip(), activo=1).first()
     if not u or not verify_password(password, u.password_hash):
         return RedirectResponse("/login?error=Correo+o+contrase%C3%B1a+inv%C3%A1lidos", status_code=302)
     r = RedirectResponse("/panel", status_code=302)

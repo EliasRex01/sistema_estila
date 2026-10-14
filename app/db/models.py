@@ -1,4 +1,8 @@
-"""Modelos Estila segun diccionario de datos §8. Toda tabla operativa lleva tenant_id (RNF02)."""
+"""Modelos Estila segun diccionario de datos §8. Toda tabla operativa lleva tenant_id.
+
+Motor principal: Oracle (ADB/XE). Nota Oracle: '' se almacena como NULL,
+por eso las respuestas API/plantillas normalizan con `or ""`.
+`func.current_timestamp()` vale en Oracle, Postgres y SQLite."""
 
 import uuid
 from datetime import datetime
@@ -21,7 +25,7 @@ class Tenant(Base):
     timbrado: Mapped[str] = mapped_column(String(20), default="")
     cert_p12_path_enc: Mapped[str] = mapped_column(Text, default="")  # ruta cifrada (RNF04)
     estado: Mapped[str] = mapped_column(String(20), default="ACTIVO")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.current_timestamp())
 
 
 class UsuarioPersonal(Base):
@@ -47,7 +51,7 @@ class Cliente(Base):
     direccion: Mapped[str] = mapped_column(String(255), default="")
     n_visitas: Mapped[int] = mapped_column(Integer, default=0)
     ficha_json: Mapped[str] = mapped_column(Text, default="{}")  # alergias, preferencias
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.current_timestamp())
 
 
 class Servicio(Base):
@@ -94,7 +98,7 @@ class VentaCabecera(Base):
     medio_pago: Mapped[str] = mapped_column(String(20), default="EFECTIVO")
     total_gs: Mapped[int] = mapped_column(Integer, default=0)
     estado_sifen: Mapped[str] = mapped_column(String(20), default="PENDIENTE")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.current_timestamp())
 
 
 class VentaDetalle(Base):
@@ -137,4 +141,4 @@ class Auditoria(Base):
     usuario_id: Mapped[str] = mapped_column(String(36), default="")
     accion: Mapped[str] = mapped_column(String(100))
     detalle: Mapped[str] = mapped_column(Text, default="{}")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.current_timestamp())

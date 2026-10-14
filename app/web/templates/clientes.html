@@ -5,7 +5,7 @@
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
 <table>
 <tr><th>Nombre</th><th>CI/RUC</th><th>Teléfono</th><th>Visitas</th></tr>
-{% for c in filas %}<tr><td>{{ c.nombre }}</td><td>{{ c.ci_ruc }}</td><td>{{ c.telefono }}</td><td>{{ c.n_visitas }}</td></tr>{% endfor %}
+{% for c in filas %}<tr><td>{{ c.nombre }}</td><td>{{ c.ci_ruc or "" }}</td><td>{{ c.telefono or "" }}</td><td>{{ c.n_visitas }}</td></tr>{% endfor %}
 </table>
 {% if puede_crear %}
 <h3>Alta de cliente</h3>

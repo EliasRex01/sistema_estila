@@ -10,6 +10,12 @@ from app.modules.clientes.service import validar_ci_ruc_py
 router = APIRouter(prefix="/clientes", tags=["clientes"])
 
 
+def _out(c: models.Cliente) -> ClienteOut:
+    # Oracle convierte '' en NULL: normalizar al responder.
+    return ClienteOut(id=c.id, nombre=c.nombre or "", ci_ruc=c.ci_ruc or "", telefono=c.telefono or "",
+                      direccion=c.direccion or "", ficha_json=c.ficha_json or "{}", n_visitas=c.n_visitas)
+
+
 @router.post("", response_model=ClienteOut)
 def crear(body: ClienteCreate, db: Session = Depends(get_db), ctx: dict = Depends(require_roles("ADMIN", "RECEPCION"))):
     set_rls_tenant(db, ctx["tenant_id"])
@@ -22,16 +28,14 @@ def crear(body: ClienteCreate, db: Session = Depends(get_db), ctx: dict = Depend
     db.add(c)
     db.commit()
     db.refresh(c)
-    return ClienteOut(id=c.id, nombre=c.nombre, ci_ruc=c.ci_ruc, telefono=c.telefono,
-                      direccion=c.direccion, ficha_json=c.ficha_json, n_visitas=c.n_visitas)
+    return _out(c)
 
 
 @router.get("", response_model=list[ClienteOut])
 def listar(db: Session = Depends(get_db), ctx: dict = Depends(require_roles("ADMIN", "RECEPCION", "ESTILISTA"))):
     set_rls_tenant(db, ctx["tenant_id"])
     rows = db.query(models.Cliente).filter_by(tenant_id=ctx["tenant_id"]).order_by(models.Cliente.nombre).all()
-    return [ClienteOut(id=r.id, nombre=r.nombre, ci_ruc=r.ci_ruc, telefono=r.telefono,
-                       direccion=r.direccion, ficha_json=r.ficha_json, n_visitas=r.n_visitas) for r in rows]
+    return [_out(r) for r in rows]
 
 
 @router.get("/sin-turno", response_model=list[ClienteOut])
@@ -48,5 +52,4 @@ def sin_turno(db: Session = Depends(get_db), ctx: dict = Depends(require_roles("
     rows = db.query(models.Cliente).filter(
         models.Cliente.tenant_id == ctx["tenant_id"], ~models.Cliente.id.in_(sub)
     ).all()
-    return [ClienteOut(id=r.id, nombre=r.nombre, ci_ruc=r.ci_ruc, telefono=r.telefono,
-                       direccion=r.direccion, ficha_json=r.ficha_json, n_visitas=r.n_visitas) for r in rows]
+    return [_out(r) for r in rows]

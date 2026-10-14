@@ -14,7 +14,7 @@ ESTADOS_ACTIVOS = ["RESERVADO", "CONFIRMADO", "BLOQUEADO"]
 def _out(t: models.Turno) -> TurnoOut:
     return TurnoOut(id=t.id, cliente_id=t.cliente_id, profesional_id=t.profesional_id,
                     servicio_id=t.servicio_id, inicio=t.inicio, fin=t.fin,
-                    estado=t.estado, motivo_cancelacion=t.motivo_cancelacion, canal=t.canal)
+                    estado=t.estado, motivo_cancelacion=(t.motivo_cancelacion or ""), canal=t.canal)
 
 
 @router.post("", response_model=TurnoOut)

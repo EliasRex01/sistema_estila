@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
 from app.db import models
-from app.db.session import get_db
+from app.db.session import auth_mode, get_db
 from app.modules.tenants.schemas import TenantCreate, TenantOut
 from app.modules.tenants.service import validar_ruc_py
 
@@ -21,9 +21,11 @@ def crear_tenant(body: TenantCreate, db: Session = Depends(get_db)):
     t = models.Tenant(ruc=ruc, razon_social=body.razon_social, timbrado=body.timbrado)
     db.add(t)
     db.flush()  # obtiene t.id
-    if db.query(models.UsuarioPersonal).filter_by(email=body.admin_email).first():
-        db.rollback()
-        raise HTTPException(409, "Email admin ya existe")
+    # El email debe ser unico GLOBAL (el login busca por email sin tenant).
+    with auth_mode(db):
+        if db.query(models.UsuarioPersonal).filter_by(email=body.admin_email).first():
+            db.rollback()
+            raise HTTPException(409, "Email admin ya existe")
     admin = models.UsuarioPersonal(
         tenant_id=t.id,
         nombre=body.admin_nombre,
