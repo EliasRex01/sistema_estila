@@ -39,6 +39,20 @@ def exigir(request: Request, *roles: str):
     return ctx, None
 
 
+def pagina(pag: int, total: int, por_pag: int = 10) -> dict:
+    """Paginacion empresarial: 10 filas, rango 'X a Y de Z', sin numero actual."""
+    total_pags = max((total + por_pag - 1) // por_pag, 1)
+    pag = min(max(pag, 1), total_pags)
+    ini = max(pag - 3, 1)
+    fin = min(ini + 6, total_pags)
+    ini = max(fin - 6, 1)
+    return {"pag": pag, "total": total, "total_pags": total_pags,
+            "desde": (pag - 1) * por_pag + 1 if total else 0,
+            "hasta": min(pag * por_pag, total),
+            "pags": [p for p in range(ini, fin + 1) if p != pag],
+            "offset": (pag - 1) * por_pag, "limite": por_pag}
+
+
 @router.get("/")
 def raiz(request: Request):
     return RedirectResponse("/panel" if ui_ctx(request) else "/login", status_code=302)
@@ -85,20 +99,10 @@ def personal_get(request: Request, db: Session = Depends(get_db), error: str = "
     if red:
         return red
     set_rls_tenant(db, ctx["tenant_id"])
-    POR_PAG = 10
     base = db.query(models.UsuarioPersonal).filter_by(tenant_id=ctx["tenant_id"]).order_by(models.UsuarioPersonal.nombre)
-    total = base.count()
-    total_pags = max((total + POR_PAG - 1) // POR_PAG, 1)
-    pag = min(max(pag, 1), total_pags)
-    filas = base.offset((pag - 1) * POR_PAG).limit(POR_PAG).all()
-    desde = (pag - 1) * POR_PAG + 1 if total else 0
-    hasta = min(pag * POR_PAG, total)
-    ini = max(pag - 3, 1)
-    fin = min(ini + 6, total_pags)
-    ini = max(fin - 6, 1)
-    return templates.TemplateResponse(request, "personal.html", {
-        **shell(db, ctx), "filas": filas, "error": error, "pag": pag, "total": total,
-        "desde": desde, "hasta": hasta, "total_pags": total_pags, "pags": list(range(ini, fin + 1))})
+    pg = pagina(pag, base.count())
+    filas = base.offset(pg["offset"]).limit(pg["limite"]).all()
+    return templates.TemplateResponse(request, "personal.html", {**shell(db, ctx), "filas": filas, "error": error, **pg})
 
 
 @router.post("/ui/personal")
@@ -195,14 +199,16 @@ def personal_eliminar(request: Request, uid: str, db: Session = Depends(get_db))
 
 # --- Clientes ---
 @router.get("/ui/clientes")
-def clientes_get(request: Request, db: Session = Depends(get_db), error: str = ""):
+def clientes_get(request: Request, db: Session = Depends(get_db), error: str = "", pag: int = 1):
     ctx, red = exigir(request, "ADMIN", "RECEPCION")
     if red:
         return red
     set_rls_tenant(db, ctx["tenant_id"])
-    filas = db.query(models.Cliente).filter_by(tenant_id=ctx["tenant_id"]).order_by(models.Cliente.nombre).all()
+    base = db.query(models.Cliente).filter_by(tenant_id=ctx["tenant_id"]).order_by(models.Cliente.nombre)
+    pg = pagina(pag, base.count())
+    filas = base.offset(pg["offset"]).limit(pg["limite"]).all()
     return templates.TemplateResponse(request, "clientes.html",
-                                      {**shell(db, ctx), "filas": filas, "titulo": "Clientes", "puede_crear": True, "puede_editar": True, "error": error})
+                                      {**shell(db, ctx), "filas": filas, "titulo": "Clientes", "puede_crear": True, "puede_editar": True, "error": error, "base_url": "/ui/clientes", **pg})
 
 
 @router.post("/ui/clientes")
@@ -222,7 +228,7 @@ def clientes_post(request: Request, nombre: str = Form(...), ci_ruc: str = Form(
 
 
 @router.get("/ui/clientes/sin-turno")
-def sin_turno(request: Request, db: Session = Depends(get_db)):
+def sin_turno(request: Request, db: Session = Depends(get_db), pag: int = 1):
     ctx, red = exigir(request, "ADMIN", "RECEPCION")
     if red:
         return red
@@ -231,9 +237,12 @@ def sin_turno(request: Request, db: Session = Depends(get_db)):
     sub = db.query(models.Turno.cliente_id).filter(
         models.Turno.tenant_id == ctx["tenant_id"], models.Turno.inicio >= ahora,
         models.Turno.estado.in_(["RESERVADO", "CONFIRMADO"])).subquery()
-    filas = db.query(models.Cliente).filter(models.Cliente.tenant_id == ctx["tenant_id"], ~models.Cliente.id.in_(sub)).all()
+    base = db.query(models.Cliente).filter(
+        models.Cliente.tenant_id == ctx["tenant_id"], ~models.Cliente.id.in_(sub)).order_by(models.Cliente.nombre)
+    pg = pagina(pag, base.count())
+    filas = base.offset(pg["offset"]).limit(pg["limite"]).all()
     return templates.TemplateResponse(request, "clientes.html",
-                                      {**shell(db, ctx), "filas": filas, "titulo": "Clientes sin turno (seguimiento)", "puede_crear": False, "puede_editar": True, "error": ""})
+                                      {**shell(db, ctx), "filas": filas, "titulo": "Clientes sin turno (seguimiento)", "puede_crear": False, "puede_editar": True, "error": "", "base_url": "/ui/clientes/sin-turno", **pg})
 
 
 @router.get("/ui/clientes/{cid}/editar")
@@ -287,14 +296,16 @@ def cliente_eliminar(request: Request, cid: str, db: Session = Depends(get_db)):
 
 # --- Servicios ---
 @router.get("/ui/servicios")
-def servicios_get(request: Request, db: Session = Depends(get_db), error: str = ""):
+def servicios_get(request: Request, db: Session = Depends(get_db), error: str = "", pag: int = 1):
     ctx, red = exigir(request, "ADMIN", "RECEPCION", "ESTILISTA")
     if red:
         return red
     set_rls_tenant(db, ctx["tenant_id"])
-    filas = db.query(models.Servicio).filter_by(tenant_id=ctx["tenant_id"]).all()
+    base = db.query(models.Servicio).filter_by(tenant_id=ctx["tenant_id"]).order_by(models.Servicio.nombre)
+    pg = pagina(pag, base.count())
+    filas = base.offset(pg["offset"]).limit(pg["limite"]).all()
     return templates.TemplateResponse(request, "servicios.html",
-                                      {**shell(db, ctx), "filas": filas, "puede_crear": ctx["rol"] == "ADMIN", "error": error})
+                                      {**shell(db, ctx), "filas": filas, "puede_crear": ctx["rol"] == "ADMIN", "error": error, **pg})
 
 
 @router.post("/ui/servicios")
@@ -370,14 +381,16 @@ def _turnos_filas(db: Session, ctx: dict):
 
 
 @router.get("/ui/turnos")
-def turnos_get(request: Request, db: Session = Depends(get_db), error: str = ""):
+def turnos_get(request: Request, db: Session = Depends(get_db), error: str = "", pag: int = 1):
     ctx, red = exigir(request, "ADMIN", "RECEPCION", "ESTILISTA")
     if red:
         return red
     set_rls_tenant(db, ctx["tenant_id"])
-    base = {**shell(db, ctx), "filas": _turnos_filas(db, ctx), "error": error,
+    todas = _turnos_filas(db, ctx)
+    pg = pagina(pag, len(todas))
+    base = {**shell(db, ctx), "filas": todas[pg["offset"]:pg["offset"] + pg["limite"]], "error": error,
             "titulo": "Mi agenda" if ctx["rol"] == "ESTILISTA" else "Turnos",
-            "puede_gestionar": ctx["rol"] in ("ADMIN", "RECEPCION")}
+            "puede_gestionar": ctx["rol"] in ("ADMIN", "RECEPCION"), **pg}
     if base["puede_gestionar"]:
         base.update({
             "clientes": db.query(models.Cliente).filter_by(tenant_id=ctx["tenant_id"]).all(),

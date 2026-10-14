@@ -1,22 +1,41 @@
 {% extends "base.html" %}
 {% block titulo %}Clientes · Estila{% endblock %}
 {% block contenido %}
-<h2>{{ titulo }}</h2>
+<div>
+  <h2>{{ titulo }}</h2>
+</div>
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
-<table>
-<tr><th>Nombre</th><th>CI/RUC</th><th>Teléfono</th><th>Visitas</th>{% if puede_editar %}<th>Acciones</th>{% endif %}</tr>
-{% for c in filas %}<tr><td>{{ c.nombre }}</td><td>{{ c.ci_ruc or "" }}</td><td>{{ c.telefono or "" }}</td><td>{{ c.n_visitas }}</td>
-{% if puede_editar %}<td><a href="/ui/clientes/{{ c.id }}/editar">Editar</a>
-<form method="post" action="/ui/clientes/{{ c.id }}/eliminar" style="display:inline" onsubmit="return confirm('¿Eliminar a {{ c.nombre }}? Solo si no tiene turnos.')"> <button type="submit" class="btn-peligro">Eliminar</button></form></td>{% endif %}</tr>{% endfor %}
-</table>
+<div id="form-alta" style="display:none">
 {% if puede_crear %}
-<h3>Alta de cliente</h3>
-<form class="card" method="post" action="/ui/clientes">
-  <input name="nombre" placeholder="Nombre" required>
-  <input name="ci_ruc" placeholder="CI/RUC (ej. 1234567)">
-  <input name="telefono" placeholder="Teléfono">
-  <input name="direccion" placeholder="Dirección">
-  <button type="submit">Guardar</button>
-</form>
+  <h3>Alta de cliente</h3>
+  <form class="card" method="post" action="/ui/clientes">
+    <input name="nombre" placeholder="Nombre" required>
+    <input name="ci_ruc" placeholder="CI/RUC (ej. 1234567)">
+    <input name="telefono" placeholder="Teléfono">
+    <input name="direccion" placeholder="Dirección">
+    <div>
+      <button type="submit">Guardar</button>
+      <button type="button" class="btn-secundario" onclick="document.getElementById('form-alta').style.display='none';document.getElementById('btn-incluir').style.display=''">Cancelar</button>
+    </div>
+  </form>
 {% endif %}
+</div>
+<table>
+<tr><th></th><th></th><th>Nombre</th><th>CI/RUC</th><th>Teléfono</th><th>Visitas</th></tr>
+{% for c in filas %}<tr>
+<td class="col-icono">{% if puede_editar %}<a href="/ui/clientes/{{ c.id }}/editar" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d9a400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg></a>{% endif %}</td>
+<td class="col-icono">{% if puede_editar %}<form method="post" action="/ui/clientes/{{ c.id }}/eliminar" style="display:inline" onsubmit="return confirm('¿Eliminar a {{ c.nombre }}? Solo si no tiene turnos.')"><button type="submit" class="btn-icono" title="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b3261e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6"/></svg></button></form>{% endif %}</td>
+<td>{{ c.nombre }}</td><td>{{ c.ci_ruc or "" }}</td><td>{{ c.telefono or "" }}</td><td>{{ c.n_visitas }}</td></tr>{% endfor %}
+</table>
+<div class="pie-reporte">
+  <div>{% if puede_crear %}<button type="button" id="btn-incluir" onclick="document.getElementById('form-alta').style.display='block';this.style.display='none'">+ Incluir</button>{% endif %}</div>
+  <div class="paginacion">
+    <div class="pags">
+      {% if pag > 1 %}<a href="{{ base_url }}?pag={{ pag - 1 }}">‹ Anterior</a>{% endif %}
+      {% for p in pags %}<a href="{{ base_url }}?pag={{ p }}">{{ p }}</a>{% endfor %}
+      {% if pag < total_pags %}<a href="{{ base_url }}?pag={{ pag + 1 }}">Siguiente ›</a>{% endif %}
+    </div>
+    <div class="rango">{{ desde }} a {{ hasta }} de {{ total }}</div>
+  </div>
+</div>
 {% endblock %}

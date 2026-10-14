@@ -1,35 +1,51 @@
 {% extends "base.html" %}
 {% block titulo %}Turnos · Estila{% endblock %}
 {% block contenido %}
-<h2>{{ titulo }}</h2>
+<div>
+  <h2>{{ titulo }}</h2>
+</div>
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
+<div id="form-alta" style="display:none">
+{% if puede_gestionar %}
+  <h3>Reservar turno</h3>
+  <form class="card" method="post" action="/ui/turnos">
+    <label>Cliente<select name="cliente_id">{% for c in clientes %}<option value="{{ c.id }}">{{ c.nombre }}</option>{% endfor %}</select></label>
+    <label>Profesional<select name="profesional_id">{% for p in profesionales %}<option value="{{ p.id }}">{{ p.nombre }}</option>{% endfor %}</select></label>
+    <label>Servicio<select name="servicio_id">{% for s in servicios %}<option value="{{ s.id }}">{{ s.nombre }} ({{ s.duracion_min }} min)</option>{% endfor %}</select></label>
+    <label>Fecha y hora<input type="datetime-local" name="inicio" required></label>
+    <div>
+      <button type="submit">Reservar</button>
+      <button type="button" class="btn-secundario" onclick="document.getElementById('form-alta').style.display='none';document.getElementById('btn-incluir').style.display=''">Cancelar</button>
+    </div>
+  </form>
+{% endif %}
+</div>
 <table>
-<tr><th>Fecha</th><th>Cliente</th><th>Profesional</th><th>Servicio</th><th>Estado</th><th>Acciones</th></tr>
+<tr><th></th><th></th><th>Fecha</th><th>Cliente</th><th>Profesional</th><th>Servicio</th><th>Estado</th><th>Acciones</th></tr>
 {% for t in filas %}
 <tr>
+  <td class="col-icono">{% if puede_gestionar and t.estado in ["RESERVADO", "CONFIRMADO"] %}<a href="/ui/turnos/{{ t.id }}/editar" title="Reprogramar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d9a400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg></a>{% endif %}</td>
+  <td class="col-icono">{% if puede_gestionar and t.estado == "RESERVADO" %}<form method="post" action="/ui/turnos/{{ t.id }}/eliminar" style="display:inline" onsubmit="return confirm('¿Eliminar la reserva?')"><button type="submit" class="btn-icono" title="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b3261e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6"/></svg></button></form>{% endif %}</td>
   <td>{{ t.inicio }}</td><td>{{ t.cliente }}</td><td>{{ t.profesional }}</td><td>{{ t.servicio }}</td><td>{{ t.estado }}</td>
-  <td>{% if puede_gestionar and t.estado in ["RESERVADO", "CONFIRMADO"] %}
-    <a href="/ui/turnos/{{ t.id }}/editar">Reprogramar</a>
+  <td>{% if t.estado in ["RESERVADO", "CONFIRMADO"] %}
     <form method="post" action="/ui/turnos/{{ t.id }}/atender" style="display:inline"> <button type="submit">Atendido</button></form>
     {% endif %}{% if puede_gestionar and t.estado in ["RESERVADO", "CONFIRMADO"] %}
     <form method="post" action="/ui/turnos/{{ t.id }}/cancelar" style="display:inline">
       <input name="motivo" placeholder="Motivo" required size="12">
       <button type="submit" class="btn-peligro">Cancelar</button>
-    </form>{% endif %}{% if puede_gestionar and t.estado == "RESERVADO" %}
-    <form method="post" action="/ui/turnos/{{ t.id }}/eliminar" style="display:inline" onsubmit="return confirm('¿Eliminar la reserva?')"> <button type="submit" class="btn-peligro">Eliminar</button></form>{% endif %}
-    {% if not puede_gestionar and t.estado in ["RESERVADO", "CONFIRMADO"] %}
-    <form method="post" action="/ui/turnos/{{ t.id }}/atender" style="display:inline"> <button type="submit">Atendido</button></form>{% endif %}</td>
+    </form>{% endif %}</td>
 </tr>
 {% endfor %}
 </table>
-{% if puede_gestionar %}
-<h3>Reservar turno</h3>
-<form class="card" method="post" action="/ui/turnos">
-  <label>Cliente<select name="cliente_id">{% for c in clientes %}<option value="{{ c.id }}">{{ c.nombre }}</option>{% endfor %}</select></label>
-  <label>Profesional<select name="profesional_id">{% for p in profesionales %}<option value="{{ p.id }}">{{ p.nombre }}</option>{% endfor %}</select></label>
-  <label>Servicio<select name="servicio_id">{% for s in servicios %}<option value="{{ s.id }}">{{ s.nombre }} ({{ s.duracion_min }} min)</option>{% endfor %}</select></label>
-  <label>Fecha y hora<input type="datetime-local" name="inicio" required></label>
-  <button type="submit">Reservar</button>
-</form>
-{% endif %}
+<div class="pie-reporte">
+  <div>{% if puede_gestionar %}<button type="button" id="btn-incluir" onclick="document.getElementById('form-alta').style.display='block';this.style.display='none'">+ Incluir</button>{% endif %}</div>
+  <div class="paginacion">
+    <div class="pags">
+      {% if pag > 1 %}<a href="/ui/turnos?pag={{ pag - 1 }}">‹ Anterior</a>{% endif %}
+      {% for p in pags %}<a href="/ui/turnos?pag={{ p }}">{{ p }}</a>{% endfor %}
+      {% if pag < total_pags %}<a href="/ui/turnos?pag={{ pag + 1 }}">Siguiente ›</a>{% endif %}
+    </div>
+    <div class="rango">{{ desde }} a {{ hasta }} de {{ total }}</div>
+  </div>
+</div>
 {% endblock %}

@@ -32,6 +32,9 @@ sql/rls.sql                        LEGADO Postgres, sin mantenimiento
 scripts/check_ui_roles.py          18 controles de menu por rol (vivo)
 scripts/check_tema.py              9 controles de tema (vivo)
 scripts/check_crud.py              23 controles CRUD + reglas (vivo)
+scripts/check_abm_ui.py            formato ABM en clientes/servicios/turnos/sin-turno (vivo)
+scripts/check_personal_ui.py       formato ABM personal + paginacion (vivo)
+scripts/check_turno_iconos.py      iconos con turno RESERVADO temporal (vivo, lo borra)
 scripts/probar_oracle.py           conexion + VPD + aislamiento (solo lectura, contra Oracle real)
 scripts/dev.ps1                    arranque dev
 tests/test_multitenant.py          9 tests sin BD ni red (solape, RUC/CI, comision, fin)
@@ -88,6 +91,9 @@ se borra lo borrable; lo desactivado (`activo=0`) se deja identificado.
   (suma visita) o CANCELADO (con motivo, terminal). Nada sale de terminales.
 - **UI**: Jinja sin `{{` dentro de `<script>`; formularios POST + redirect
   (PRG); errores por `?error=`. Sin JS salvo `confirm()` en bajas.
+- **ABM empresarial**: alta tras boton "+ Incluir" (form oculto, pie del
+  reporte); 1ra columna lapiz amarillo, 2da basurero rojo (solo iconos SVG);
+  helper `pagina()` (10 filas, rango "X a Y de Z", sin numero actual).
 - Comentarios en español, concisos. Referencias como `ruta:línea`.
 
 ## 5. Reglas de dominio (no relajar sin pedir)
