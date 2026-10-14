@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}Personal · Estila{% endblock %}
+{% block contenido %}
+<h2>Personal</h2>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<table>
+<tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Comisión %</th></tr>
+{% for u in filas %}<tr><td>{{ u.nombre }}</td><td>{{ u.email }}</td><td>{{ u.rol }}</td><td>{{ u.comision_default_pct }}</td></tr>{% endfor %}
+</table>
+<h3>Alta de personal</h3>
+<form class="card" method="post" action="/ui/personal">
+  <input name="nombre" placeholder="Nombre" required>
+  <input name="email" type="email" placeholder="Correo" required>
+  <input name="password" type="password" placeholder="Contraseña (8+)" required>
+  <select name="rol"><option>ESTILISTA</option><option>RECEPCION</option><option>ADMIN</option></select>
+  <input name="comision_default_pct" type="number" step="0.01" min="0" max="100" value="0">
+  <button type="submit">Guardar</button>
+</form>
+{% endblock %}

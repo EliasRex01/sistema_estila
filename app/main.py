@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.db.init_db import init_db
 from app.modules.auth.router import router as auth_router
@@ -7,10 +8,14 @@ from app.modules.personal.router import router as personal_router
 from app.modules.servicios.router import router as servicios_router
 from app.modules.tenants.router import router as tenants_router
 from app.modules.turnos.router import router as turnos_router
+from app.web.router import router as web_router
 
 app = FastAPI(title="Estila SaaS Multitenant - Arselia piloto")
 
 init_db()  # dev; prod usar Alembic + sql/rls.sql
+app.mount("/static", StaticFiles(directory="app/web/static"), name="static")
+
+app.include_router(web_router)
 
 app.include_router(tenants_router)
 app.include_router(auth_router)

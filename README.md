@@ -16,7 +16,17 @@ py -m app.db.init_db
 Prod Postgres: `docker compose up -d db` luego `DATABASE_URL=postgresql+psycopg2://estila:estila@localhost:5433/estila`
 y aplicar `sql/rls.sql` con psql tras el primer arranque.
 
-## Flujo piloto
+## Interfaz web
+
+Entrar en http://127.0.0.1:8001 con correo + contraseña. El menú se adapta al rol:
+
+- ADMIN: Personal, Clientes, Servicios, Turnos, Sin turno (+ tarjetas de POS/Caja/Comisiones/Inventario/Reportes como próximos módulos).
+- RECEPCION: Turnos, Clientes, Sin turno.
+- ESTILISTA: Mi agenda (solo sus turnos), Servicios.
+
+Páginas en `/ui/...` (el API JSON sigue en `/personal`, `/clientes`, etc. y en `/docs`).
+
+## Flujo piloto (API)
 
 1. `POST /tenants` {ruc, razon_social, admin_nombre, admin_email, admin_password} -> crea tenant + ADMIN.
 2. `POST /auth/login` {email, password} -> JWT con tenant_id + rol. Usar header `Authorization: Bearer` + `X-Tenant-ID`.

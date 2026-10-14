@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titulo %}Servicios · Estila{% endblock %}
+{% block contenido %}
+<h2>Servicios</h2>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<table>
+<tr><th>Nombre</th><th>Duración</th><th>Precio Gs.</th><th>Comisión %</th></tr>
+{% for s in filas %}<tr><td>{{ s.nombre }}</td><td>{{ s.duracion_min }} min</td><td>{{ s.precio_gs }}</td><td>{{ s.comision_pct }}</td></tr>{% endfor %}
+</table>
+{% if puede_crear %}
+<h3>Alta de servicio</h3>
+<form class="card" method="post" action="/ui/servicios">
+  <input name="nombre" placeholder="Nombre" required>
+  <input name="duracion_min" type="number" min="5" max="480" value="30">
+  <input name="precio_gs" type="number" min="0" value="0">
+  <input name="comision_pct" type="number" step="0.01" min="0" max="100" value="0">
+  <button type="submit">Guardar</button>
+</form>
+{% endif %}
+{% endblock %}

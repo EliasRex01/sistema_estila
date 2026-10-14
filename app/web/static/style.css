@@ -1,0 +1,21 @@
+:root { --pri: #6d28d9; --bg: #f5f3ff; --txt: #1e1b2e; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--txt); }
+.top { display: flex; justify-content: space-between; align-items: center; background: var(--pri); color: #fff; padding: 12px 18px; }
+.top a { color: #fff; }
+.marca { font-weight: 700; font-size: 1.2rem; }
+.menu { display: flex; gap: 6px; flex-wrap: wrap; background: #ede9fe; padding: 8px 18px; }
+.menu a { text-decoration: none; background: #fff; color: var(--pri); padding: 8px 14px; border-radius: 8px; font-weight: 600; }
+main { padding: 18px; max-width: 1000px; margin: auto; }
+.tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.tarjeta { background: #fff; border-radius: 12px; padding: 18px; text-decoration: none; color: var(--txt); box-shadow: 0 1px 4px #0002; }
+.tarjeta h3 { margin: 0 0 6px; color: var(--pri); }
+.tarjeta.prox { opacity: .55; }
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; }
+th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+form.card { background: #fff; padding: 16px; border-radius: 12px; margin: 16px 0; display: grid; gap: 10px; max-width: 560px; }
+input, select, button { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
+button { background: var(--pri); color: #fff; border: none; cursor: pointer; font-weight: 700; }
+.error { background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 8px; }
+.login-wrap { max-width: 420px; margin: 8vh auto; }
+.login-wrap h1 { color: var(--pri); }
