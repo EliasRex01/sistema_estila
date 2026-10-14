@@ -1,3 +1,8 @@
+# BASE
+Admin: admin@arselia.py / Segura123! → menú completo (Personal, Clientes, Servicios, Turnos, Sin turno)
+Recepción: recep@arselia.py / Segura123! → Turnos, Clientes, Sin turno
+Estilista: esti@arselia.py / Segura123! → solo Mi agenda y Servicios
+
 # Despliegue en Vercel (entorno de pruebas)
 
 La app corre en Vercel como función serverless (`api/index.py` + `vercel.json`).
@@ -42,3 +47,25 @@ Abrir la URL → login → panel. Primer paso: `POST /tenants` en
 Pages solo publica archivos estáticos (HTML/CSS/JS): no ejecuta Python ni
 bases de datos, así que este sistema no puede correr ahí. Si algún día se
 quiere una portada estática en Pages, el API igual debe vivir en Vercel/VM.
+
+# Bases, por definir y hacer despues 
+api/index.py (adaptador Mangum), vercel.json (todas las rutas → la app), 
+.vercelignore. 
+Lo que falta:
+Crear DB gratis en Neon y correr el esquema una vez desde una PC 
+(comando arriba) + aplicar sql/rls.sql.
+En Vercel: importar EliasRex01/sistema_estila,      -> de github de elias 
+cargar DATABASE_URL, JWT_SECRET (32+ caracteres) y MASTER_KEY, Deploy.
+Condiciones: en Vercel no vale SQLite (los datos se perderían, 
+por eso el Postgres externo); plan Hobby con arranque en frío de unos segundos 
+y timeout de 10 s — bien para desarrollo/pruebas, no para producción final.
+
+# Lo que sí podés hacer gratis para producción piloto:
+- Servidor: VM Ampere (Ubuntu) en Oracle Free Tier + tu docker-compose (app + Postgres). 
+O mejor: Oracle Autonomous Database gratis (2 bases de 20 GB, con respaldo incluido) + la app en la VM.
+- HTTPS sin pagar dominio: subdominio gratuito tipo estila-piloto.duckdns.org (DuckDNS) 
++ Caddy como proxy (certificado Let's Encrypt automático). Funciona para probar, incluida 
+la futura conexión con WhatsApp Cloud/SIFEN que exige HTTPS pública.
+- Dominio propio (recomendado al salir a clientes reales, ~USD 12/año un .com 
+o el .com.py en NIC-PY): lo apuntás a la VM y Caddy hace el resto.
+- Respaldos (RNF08): pg_dump diario por cron hacia Object Storage de Oracle (10 GB gratis).
