@@ -2,10 +2,13 @@
 {% block titulo %}Personal · Estila{% endblock %}
 {% block contenido %}
 <h2>Personal</h2>
+<p class="sub">Altas, edición y bajas (la baja desactiva sin borrar el historial)</p>
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
 <table>
-<tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Comisión %</th></tr>
-{% for u in filas %}<tr><td>{{ u.nombre }}</td><td>{{ u.email }}</td><td>{{ u.rol }}</td><td>{{ u.comision_default_pct }}</td></tr>{% endfor %}
+<tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Comisión %</th><th>Estado</th><th>Acciones</th></tr>
+{% for u in filas %}<tr><td>{{ u.nombre }}</td><td>{{ u.email }}</td><td>{{ u.rol }}</td><td>{{ u.comision_default_pct }}</td><td>{{ "Activo" if u.activo else "Inactivo" }}</td>
+<td><a href="/ui/personal/{{ u.id }}/editar">Editar</a>
+{% if u.activo %}<form method="post" action="/ui/personal/{{ u.id }}/eliminar" style="display:inline" onsubmit="return confirm('¿Desactivar a {{ u.nombre }}?')"> <button type="submit" class="btn-peligro">Desactivar</button></form>{% endif %}</td></tr>{% endfor %}
 </table>
 <h3>Alta de personal</h3>
 <form class="card" method="post" action="/ui/personal">

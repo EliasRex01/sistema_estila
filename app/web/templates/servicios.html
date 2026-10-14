@@ -4,8 +4,10 @@
 <h2>Servicios</h2>
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
 <table>
-<tr><th>Nombre</th><th>Duración</th><th>Precio Gs.</th><th>Comisión %</th></tr>
-{% for s in filas %}<tr><td>{{ s.nombre }}</td><td>{{ s.duracion_min }} min</td><td>{{ s.precio_gs }}</td><td>{{ s.comision_pct }}</td></tr>{% endfor %}
+<tr><th>Nombre</th><th>Duración</th><th>Precio Gs.</th><th>Comisión %</th>{% if puede_crear %}<th>Acciones</th>{% endif %}</tr>
+{% for s in filas %}<tr><td>{{ s.nombre }}</td><td>{{ s.duracion_min }} min</td><td>{{ s.precio_gs }}</td><td>{{ s.comision_pct }}</td>
+{% if puede_crear %}<td><a href="/ui/servicios/{{ s.id }}/editar">Editar</a>
+<form method="post" action="/ui/servicios/{{ s.id }}/eliminar" style="display:inline" onsubmit="return confirm('¿Eliminar {{ s.nombre }}? Solo si no está referenciado.')"> <button type="submit" class="btn-peligro">Eliminar</button></form></td>{% endif %}</tr>{% endfor %}
 </table>
 {% if puede_crear %}
 <h3>Alta de servicio</h3>

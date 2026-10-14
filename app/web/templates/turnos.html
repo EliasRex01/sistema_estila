@@ -4,15 +4,21 @@
 <h2>{{ titulo }}</h2>
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
 <table>
-<tr><th>Fecha</th><th>Cliente</th><th>Profesional</th><th>Servicio</th><th>Estado</th><th></th></tr>
+<tr><th>Fecha</th><th>Cliente</th><th>Profesional</th><th>Servicio</th><th>Estado</th><th>Acciones</th></tr>
 {% for t in filas %}
 <tr>
   <td>{{ t.inicio }}</td><td>{{ t.cliente }}</td><td>{{ t.profesional }}</td><td>{{ t.servicio }}</td><td>{{ t.estado }}</td>
-  <td>{% if t.estado != "CANCELADO" and puede_gestionar %}
+  <td>{% if puede_gestionar and t.estado in ["RESERVADO", "CONFIRMADO"] %}
+    <a href="/ui/turnos/{{ t.id }}/editar">Reprogramar</a>
+    <form method="post" action="/ui/turnos/{{ t.id }}/atender" style="display:inline"> <button type="submit">Atendido</button></form>
+    {% endif %}{% if puede_gestionar and t.estado in ["RESERVADO", "CONFIRMADO"] %}
     <form method="post" action="/ui/turnos/{{ t.id }}/cancelar" style="display:inline">
       <input name="motivo" placeholder="Motivo" required size="12">
       <button type="submit" class="btn-peligro">Cancelar</button>
-    </form>{% endif %}</td>
+    </form>{% endif %}{% if puede_gestionar and t.estado == "RESERVADO" %}
+    <form method="post" action="/ui/turnos/{{ t.id }}/eliminar" style="display:inline" onsubmit="return confirm('¿Eliminar la reserva?')"> <button type="submit" class="btn-peligro">Eliminar</button></form>{% endif %}
+    {% if not puede_gestionar and t.estado in ["RESERVADO", "CONFIRMADO"] %}
+    <form method="post" action="/ui/turnos/{{ t.id }}/atender" style="display:inline"> <button type="submit">Atendido</button></form>{% endif %}</td>
 </tr>
 {% endfor %}
 </table>

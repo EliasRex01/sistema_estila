@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Editar servicio · Estila{% endblock %}
+{% block contenido %}
+<h2>Editar servicio</h2>
+<p class="sub">Los turnos ya agendados conservan su horario; los nuevos usan estos datos.</p>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form class="card" method="post" action="/ui/servicios/{{ s.id }}/guardar">
+  <label>Nombre<input name="nombre" value="{{ s.nombre }}" required></label>
+  <label>Duración (min)<input name="duracion_min" type="number" min="5" max="480" value="{{ s.duracion_min }}"></label>
+  <label>Precio Gs.<input name="precio_gs" type="number" min="0" value="{{ s.precio_gs }}"></label>
+  <label>Comisión %<input name="comision_pct" type="number" step="0.01" min="0" max="100" value="{{ s.comision_pct }}"></label>
+  <button type="submit">Guardar cambios</button>
+</form>
+<p><a href="/ui/servicios">← Volver</a></p>
+{% endblock %}

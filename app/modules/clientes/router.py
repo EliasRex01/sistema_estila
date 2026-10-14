@@ -53,3 +53,37 @@ def sin_turno(db: Session = Depends(get_db), ctx: dict = Depends(require_roles("
         models.Cliente.tenant_id == ctx["tenant_id"], ~models.Cliente.id.in_(sub)
     ).all()
     return [_out(r) for r in rows]
+
+
+@router.put("/{cid}", response_model=ClienteOut)
+def actualizar(cid: str, body: ClienteCreate, db: Session = Depends(get_db),
+               ctx: dict = Depends(require_roles("ADMIN", "RECEPCION"))):
+    set_rls_tenant(db, ctx["tenant_id"])
+    c = db.query(models.Cliente).filter_by(id=cid, tenant_id=ctx["tenant_id"]).first()
+    if not c:
+        raise HTTPException(404, "Cliente no existe")
+    try:
+        ci = validar_ci_ruc_py(body.ci_ruc)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    c.nombre, c.ci_ruc, c.telefono, c.direccion, c.ficha_json = \
+        body.nombre, ci, body.telefono, body.direccion, body.ficha_json
+    db.commit()
+    db.refresh(c)
+    return _out(c)
+
+
+@router.delete("/{cid}")
+def eliminar(cid: str, db: Session = Depends(get_db),
+             ctx: dict = Depends(require_roles("ADMIN", "RECEPCION"))):
+    """Borra solo si no tiene turnos (preserva el historial)."""
+    set_rls_tenant(db, ctx["tenant_id"])
+    c = db.query(models.Cliente).filter_by(id=cid, tenant_id=ctx["tenant_id"]).first()
+    if not c:
+        raise HTTPException(404, "Cliente no existe")
+    n = db.query(models.Turno).filter_by(cliente_id=cid, tenant_id=ctx["tenant_id"]).count()
+    if n:
+        raise HTTPException(409, f"No se puede eliminar: tiene {n} turno(s) en el historial")
+    db.delete(c)
+    db.commit()
+    return {"ok": True, "id": cid}

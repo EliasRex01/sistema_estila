@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Reprogramar turno · Estila{% endblock %}
+{% block contenido %}
+<h2>Reprogramar turno</h2>
+<p class="sub">Se valida que el horario no se solape con la agenda del profesional.</p>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form class="card" method="post" action="/ui/turnos/{{ t.id }}/guardar">
+  <label>Cliente<select name="cliente_id">{% for c in clientes %}<option value="{{ c.id }}" {% if c.id == t.cliente_id %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}</select></label>
+  <label>Profesional<select name="profesional_id">{% for p in profesionales %}<option value="{{ p.id }}" {% if p.id == t.profesional_id %}selected{% endif %}>{{ p.nombre }}</option>{% endfor %}</select></label>
+  <label>Servicio<select name="servicio_id">{% for s in servicios %}<option value="{{ s.id }}" {% if s.id == t.servicio_id %}selected{% endif %}>{{ s.nombre }} ({{ s.duracion_min }} min)</option>{% endfor %}</select></label>
+  <label>Fecha y hora<input type="datetime-local" name="inicio" value="{{ ini_local }}" required></label>
+  <button type="submit">Guardar cambios</button>
+</form>
+<p><a href="/ui/turnos">← Volver</a></p>
+{% endblock %}

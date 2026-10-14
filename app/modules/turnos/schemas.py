@@ -20,3 +20,10 @@ class TurnoOut(TurnoCreate):
 
 class TurnoCancelar(BaseModel):
     motivo: str = Field(min_length=3, max_length=255)
+
+
+class TurnoUpdate(BaseModel):
+    cliente_id: str
+    profesional_id: str
+    servicio_id: str
+    inicio: datetime

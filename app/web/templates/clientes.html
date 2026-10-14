@@ -4,8 +4,10 @@
 <h2>{{ titulo }}</h2>
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
 <table>
-<tr><th>Nombre</th><th>CI/RUC</th><th>Teléfono</th><th>Visitas</th></tr>
-{% for c in filas %}<tr><td>{{ c.nombre }}</td><td>{{ c.ci_ruc or "" }}</td><td>{{ c.telefono or "" }}</td><td>{{ c.n_visitas }}</td></tr>{% endfor %}
+<tr><th>Nombre</th><th>CI/RUC</th><th>Teléfono</th><th>Visitas</th>{% if puede_editar %}<th>Acciones</th>{% endif %}</tr>
+{% for c in filas %}<tr><td>{{ c.nombre }}</td><td>{{ c.ci_ruc or "" }}</td><td>{{ c.telefono or "" }}</td><td>{{ c.n_visitas }}</td>
+{% if puede_editar %}<td><a href="/ui/clientes/{{ c.id }}/editar">Editar</a>
+<form method="post" action="/ui/clientes/{{ c.id }}/eliminar" style="display:inline" onsubmit="return confirm('¿Eliminar a {{ c.nombre }}? Solo si no tiene turnos.')"> <button type="submit" class="btn-peligro">Eliminar</button></form></td>{% endif %}</tr>{% endfor %}
 </table>
 {% if puede_crear %}
 <h3>Alta de cliente</h3>
