@@ -59,7 +59,8 @@ button:hover { background: var(--primario-osc); }
 .btn-peligro:hover { background: var(--err); color: #fff; }
 .btn-secundario { background: #fff; color: var(--primario); border: 1px solid var(--primario); }
 .btn-secundario:hover { background: var(--azul-claro); }
-.btn-icono { background: none; border: none; padding: 2px; cursor: pointer; }
+.btn-icono { background: none; background-color: transparent; border: none; padding: 2px; cursor: pointer; }
+.btn-icono:hover { background: none; background-color: transparent; }
 .col-icono { width: 30px; text-align: center; }
 .barra-pagina { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .barra-pagina h2 { margin-bottom: 0; }
@@ -67,6 +68,8 @@ button:hover { background: var(--primario-osc); }
 .paginacion .pags { display: flex; gap: 8px; align-items: center; }
 .paginacion a { color: var(--primario); text-decoration: none; font-weight: 600; }
 .paginacion .rango { color: var(--gris); font-size: .9rem; }
+.pie-reporte { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; }
+.pie-reporte .paginacion { margin-top: 0; }
 .error { background: #fdecea; color: var(--err); border: 1px solid #f5c6c2; padding: 10px 12px; border-radius: 6px; }
 
 /* --- Login --- */
