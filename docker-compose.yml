@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: estila
+      POSTGRES_PASSWORD: estila
+      POSTGRES_DB: estila
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata-estila:/var/lib/postgresql/data
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg2://estila:estila@db:5432/estila
+      JWT_SECRET: changeme-jwt-estila
+      MASTER_KEY: changeme-master-estila
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+volumes:
+  pgdata-estila:
