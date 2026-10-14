@@ -4,6 +4,7 @@ Piloto: Arselia Beauty Center. Alcance MVP: RF01 tenants + RF02 auth/roles + VPD
 
 Stack: FastAPI + **Oracle** (ADB Always Free en nube / SQLite en dev) + Jinja2.
 Despliegue: ver `DEPLOY_ORACLE.md` (producción) y `DEPLOY_VERCEL.md` (pruebas).
+Docs internas: `AGENTS.md` (agentes), `HUMAN.md` (tu rol), `PLAN.md` (ruta), `STRATEGY.md` (estrategia).
 
 ## Arranque dev (PowerShell)
 
