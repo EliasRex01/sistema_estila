@@ -12,6 +12,7 @@
 | Cuentas nube | Consolas OCI (ADB, wallet, VM), Vercel (env vars, deploy), GitHub. El agente no entra a tus cuentas. |
 | Verdad externa | Si SIFEN/WhatsApp/Marangatú cambió algo, tu captura o texto del portal vigente vale más que cualquier suposición. |
 | Dinero real | Cobros, certificados digitales `.p12` y claves SIFEN, número de WhatsApp Business. Nada de esto se mueve sin tu confirmación explícita. |
+| Teléfonos de clientes | Para el WhatsApp real cada ficha debe tener el número verdadero (hoy la demo acepta cualquier identificador). Si ves fichas demo ("Chat Demo", "Crud"), son filas de prueba. |
 
 ## 2. Cuentas y accesos
 
@@ -40,3 +41,5 @@
 - Sin documentos fiscales reales ni cobros sin tu confirmación explícita.
 - La vía Oracle está completa en código pero verificada en vivo solo en SQLite hasta que `probar_oracle.py` dé `ALL ORACLE OK` contra tu ADB real.
 - Los montos/comisiones de ejemplo se validan con Arselia antes de liquidar de verdad.
+- La BD dev (`estila.db`) acumula filas de prueba con nombres claros; para
+  partir de cero: borrar `estila.db` y correr `py -m app.db.init_db`.

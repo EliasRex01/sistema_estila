@@ -26,8 +26,8 @@ app/modules/chatbot/               asistente demo (RF07/08): reglas ES, identifi
                                    avisa turnos, confirma/cancela/reprograma (service+router)
 app/modules/notificaciones/        RF08: RECORDATORIO auto al reservar (24 h antes), centro /ui
 app/web/router.py + deps.py        UI cookie (login/panel//ui/*). Las paginas viven en /ui (ver §8.3)
-app/web/templates/                 base/panel/login/listados/editar_*
-app/web/static/style.css           tema empresarial (sidebar marino)
+app/web/templates/                 base(+widget chat)/panel(+agenda)/login/listados/editar_*/notificaciones
+app/web/static/style.css           tema empresarial (sidebar marino) + widget chat (versionar ?v=N, ver §8.11)
 api/index.py + vercel.json         adaptador Mangum para Vercel (pruebas)
 sql/adb_setup_admin.sql            usuario ESTILA_APP + CONTEXT (como ADMIN de ADB)
 sql/vpd_oracle.sql                 paquete ctx + funcion + 10 politicas TENANT_P (como ESTILA_APP)
@@ -96,6 +96,14 @@ se borra lo borrable; lo desactivado (`activo=0`) se deja identificado.
   (suma visita) o CANCELADO (con motivo, terminal). Nada sale de terminales.
 - **UI**: Jinja sin `{{` dentro de `<script>`; formularios POST + redirect
   (PRG); errores por `?error=`. Sin JS salvo `confirm()` en bajas.
+  Widget/similar: sin llaves Jinja en JS (datos por DOM/`localStorage` + `fetch`).
+  Al cambiar look: subir `?v=N` en `base.html` y pedir Ctrl+F5 (cache).
+- **Chatbot**: intenciones por palabras clave en orden (numero → verbo →
+  listado → saludo corto → fallback); fechas estrictas `DD/MM HH:MM`, pasado
+  es None. Sesion con `esperando` + `contexto` JSON; mensajes logueados.
+  Reusa servicios de turnos/notificaciones (nunca duplicar la logica).
+- **Notificaciones**: upsert de RECORDATORIO 24 h antes al crear/reprogramar;
+  se cancelan al cancelar/atender. Canal `WEB-DEMO` (demo) vs `WHATSAPP` (real).
 - **ABM empresarial**: alta tras boton "+ Incluir" (form oculto, pie del
   reporte); 1ra columna lapiz amarillo, 2da basurero rojo (solo iconos SVG);
   helper `pagina()` (10 filas, rango "X a Y de Z", sin numero actual).
@@ -110,7 +118,12 @@ se borra lo borrable; lo desactivado (`activo=0`) se deja identificado.
 - **Ultimo ADMIN** no se quita ni se autodesactiva (409).
 - **VPD Oracle**: predicado `tenant_id = SYS_CONTEXT(...)`, `AUTH_MODE='1'`
   solo en login/alta, limpieza en `checkin` del pool. Verificar con
-  `probar_oracle.py` contra ADB real antes de declarar listo.
+  `probar_oracle.py` contra ADB real antes de declarar listo. Tablas nuevas
+  entran al IN de `vpd_oracle.sql` (hoy 13).
+- **Chat demo**: identifica por telefono (exacto o `like`) o nombre unico;
+  homonimos se eligen por numero; confirma/cancela (motivo obligatorio)/
+  reprograma (solape validado) sobre turnos reales. Canal demo = tenant del
+  personal logueado; el canal real usara el telefono como identidad.
 
 ## 6. Seguridad y secretos
 
@@ -150,5 +163,15 @@ se borra lo borrable; lo desactivado (`activo=0`) se deja identificado.
    mensaje claro, 401/403 auth. Nunca datos inventados.
 7. **Scripts de verificacion versionados** (`check_*.py`, `probar_oracle.py`):
    un bug verificado una vez queda cubierto para siempre.
-8. **Limpieza y secretos**: borrar debug (`dbg_*.py`), revisar `git status`
-   antes de commitear; un `git diff` del archivo del usuario antes de tocarlo.
+8. **Limpieza y secretos**: borrar debug (`dbg_*.py`) y one-offs (`tmp_*.py`)
+   tras usarlos; revisar `git status` antes de commitear; un `git diff` del
+   archivo del usuario antes de tocarlo.
+9. **Scripts recurrentes vs one-off**: los `check_*` deben ser idempotentes
+   (emails/telefonos con TAG unico) e independientes de los datos (SKIP si no
+   hay filas en el estado requerido). Lo puntual va en `tmp_*.py` y se borra.
+10. **Fallo de test ≠ bug de codigo**: ante un FAIL, leer el codigo real antes
+    de "arreglarlo" (caso `int-cancelar`: el resto incluye el contexto, el test
+    estaba mal, el codigo bien).
+11. **Cache del navegador**: tras cambiar plantillas/CSS, versionar el estatico
+    (`?v=N`) y pedir Ctrl+F5; verificar en vivo con `Select-String`/scripts,
+    no por lo que "se ve".

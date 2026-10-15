@@ -1,6 +1,6 @@
 # PLAN.md — Hoja de ruta de Estila
 
-> Estado al 2026-10-14. Ver `STRATEGY.md` para el porqué y `HUMAN.md` para
+> Estado al 2026-10-15. Ver `STRATEGY.md` para el porqué y `HUMAN.md` para
 > qué se necesita del humano en cada fase. RF/RNF = anteproyecto.
 
 ## Fase 0 — Base multitenant + web (hecha)
@@ -30,7 +30,9 @@
 ## Fase 2 — Integraciones (requieren decisiones y cuentas humanas)
 
 - [ ] RF15 SIFEN: XML + firma XAdES por tenant, KuDE, eventos (nec. certificado Arselia)
-- [ ] RF07/RF08 Agente IA WhatsApp: Cloud API + LLM provider-agnostic, recordatorios
+- [ ] RF07/RF08 Agente IA WhatsApp: Cloud API + LLM provider-agnostic
+  (flujo conversacional ya validado en la demo: identificar, avisar, confirmar,
+  cancelar con motivo, reprogramar; falta adaptador al canal real + número)
 - [ ] RF19 Vitrina e-commerce conectada al kárdex (entrega tercerizada)
 - [ ] RF04 Configuración del tenant: horarios, feriados, puestos
 

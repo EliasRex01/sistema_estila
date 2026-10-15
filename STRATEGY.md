@@ -48,3 +48,14 @@
 - Datos personales (Paraguay): fichas con alergias son sensibles — mínimo
   acceso por rol (estilista solo su agenda) y nada en logs.
 - Credenciales y wallets nunca en git; secretos solo por entorno.
+
+## 7. Canal conversacional (reglas hoy, IA mañana)
+
+- Una sola lógica de turnos/notificaciones, N canales: la demo web y el futuro
+  WhatsApp comparten servicios; el adaptador solo traduce transporte.
+- Reglas primero (costo cero, determinista, testeable sin red) para validar el
+  flujo con Arselia; LLM después solo para entender lenguaje libre.
+- Notificación como registro con ciclo de vida (PENDIENTE→ENVIADA/CANCELADA),
+  nunca envíos silenciosos: en demo se marcan a mano, en real con acuse.
+- Sesiones identificadas por cliente + historial persistido (trazabilidad ante
+  reclamos: quién confirmó/canceló, cuándo y por qué motivo).
