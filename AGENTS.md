@@ -22,6 +22,9 @@ app/modules/clientes/              RF09/10/11 ABM + sin-turno; borrado solo sin 
 app/modules/servicios/             RF12 ABM; borrado solo sin referencias
 app/modules/turnos/                RF05/06: alta con antisolape, reprogramar, cancelar con motivo,
                                    atender (+1 visita), eliminar solo RESERVADO
+app/modules/chatbot/               asistente demo (RF07/08): reglas ES, identifica cliente,
+                                   avisa turnos, confirma/cancela/reprograma (service+router)
+app/modules/notificaciones/        RF08: RECORDATORIO auto al reservar (24 h antes), centro /ui
 app/web/router.py + deps.py        UI cookie (login/panel//ui/*). Las paginas viven en /ui (ver §8.3)
 app/web/templates/                 base/panel/login/listados/editar_*
 app/web/static/style.css           tema empresarial (sidebar marino)
@@ -35,6 +38,8 @@ scripts/check_crud.py              23 controles CRUD + reglas (vivo)
 scripts/check_abm_ui.py            formato ABM en clientes/servicios/turnos/sin-turno (vivo)
 scripts/check_personal_ui.py       formato ABM personal + paginacion (vivo)
 scripts/check_turno_iconos.py      iconos con turno RESERVADO temporal (vivo, lo borra)
+scripts/check_panel_chat.py        panel + chatbot demo + notificaciones (vivo)
+tests/test_chatbot.py              11 tests puros del asistente (intenciones, fechas, formato)
 scripts/probar_oracle.py           conexion + VPD + aislamiento (solo lectura, contra Oracle real)
 scripts/dev.ps1                    arranque dev
 tests/test_multitenant.py          9 tests sin BD ni red (solape, RUC/CI, comision, fin)

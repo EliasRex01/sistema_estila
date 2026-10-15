@@ -22,13 +22,13 @@ Oracle local: `docker compose up -d db` luego `DATABASE_URL=oracle+oracledb://sy
 
 ## Interfaz web
 
-Entrar en http://127.0.0.1:8001 con correo + contraseña. El menú se adapta al rol:
-
-- ADMIN: Personal, Clientes, Servicios, Turnos, Sin turno (+ tarjetas de POS/Caja/Comisiones/Inventario/Reportes como próximos módulos).
-- RECEPCION: Turnos, Clientes, Sin turno.
-- ESTILISTA: Mi agenda (solo sus turnos), Servicios.
-
-Páginas en `/ui/...` (el API JSON sigue en `/personal`, `/clientes`, etc. y en `/docs`).
+Entrar en http://127.0.0.1:8001 con correo + contraseña. El menú se adapta al rol
+(ADMIN todo, RECEPCION turnos/clientes/sin-turno/notificaciones,
+ESTILISTA su agenda + servicios). El panel muestra la agenda del día y
+contadores. Burbuja 💬 abajo a la derecha: asistente demo que avisa los turnos
+agendados al cliente (por teléfono o nombre) y permite confirmar, cancelar con
+motivo o reprogramar. Los recordatorios se programan solos al reservar
+(24 h antes) y se ven en Notificaciones.
 
 ## Flujo piloto (API)
 

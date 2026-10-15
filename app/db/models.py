@@ -142,3 +142,41 @@ class Auditoria(Base):
     accion: Mapped[str] = mapped_column(String(100))
     detalle: Mapped[str] = mapped_column(Text, default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.current_timestamp())
+
+
+class Notificacion(Base):
+    """Aviso de turno agendado (RF08). Se crea al reservar, vence 24 h antes."""
+    __tablename__ = "notificaciones"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True)
+    turno_id: Mapped[str] = mapped_column(ForeignKey("turnos.id"), index=True)
+    tipo: Mapped[str] = mapped_column(String(20), default="RECORDATORIO")
+    programada_para: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    estado: Mapped[str] = mapped_column(String(20), default="PENDIENTE")
+    # PENDIENTE/ENVIADA/CANCELADA
+    canal: Mapped[str] = mapped_column(String(20), default="WEB-DEMO")
+    detalle: Mapped[str] = mapped_column(String(255), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.current_timestamp())
+
+
+class ChatSesion(Base):
+    """Conversacion del asistente (demo del canal WhatsApp)."""
+    __tablename__ = "chat_sesiones"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True)
+    canal: Mapped[str] = mapped_column(String(20), default="WEB-DEMO")
+    identificador: Mapped[str] = mapped_column(String(100), index=True)  # cid del navegador
+    cliente_id: Mapped[str] = mapped_column(String(36), default="")
+    esperando: Mapped[str] = mapped_column(String(50), default="identificacion")
+    contexto: Mapped[str] = mapped_column(Text, default="{}")  # ej. {"turno_idx": {...}}
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.current_timestamp())
+
+
+class ChatMensaje(Base):
+    __tablename__ = "chat_mensajes"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True)
+    sesion_id: Mapped[str] = mapped_column(ForeignKey("chat_sesiones.id"), index=True)
+    rol: Mapped[str] = mapped_column(String(10))  # cliente/bot
+    texto: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.current_timestamp())

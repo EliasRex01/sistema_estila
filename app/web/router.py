@@ -13,6 +13,7 @@ from app.db import models
 from app.db.session import auth_mode, get_db, set_rls_tenant
 from app.modules.clientes.service import validar_ci_ruc_py
 from app.modules.turnos.service import calcular_fin, validar_no_solapamiento
+from app.modules.notificaciones.service import cancelar_recordatorios, programar_recordatorio
 from app.web.deps import menu_para, ui_ctx
 
 router = APIRouter()
@@ -85,11 +86,40 @@ def logout():
 
 @router.get("/panel")
 def panel(request: Request, db: Session = Depends(get_db)):
+    from datetime import datetime as _dt
     ctx, red = exigir(request)
     if red:
         return red
     set_rls_tenant(db, ctx["tenant_id"])
-    return templates.TemplateResponse(request, "panel.html", shell(db, ctx))
+    tid = ctx["tenant_id"]
+    hoy = _dt.now().date()
+    turnos = db.query(models.Turno).filter_by(tenant_id=tid).order_by(models.Turno.inicio).all()
+    de_hoy = [t for t in turnos if (t.inicio.replace(tzinfo=None).date() if t.inicio else None) == hoy]
+    if ctx["rol"] == "ESTILISTA":
+        de_hoy = [t for t in de_hoy if t.profesional_id == ctx["user_id"]]
+    futuros = [t for t in turnos if t.estado in ("RESERVADO", "CONFIRMADO")
+               and t.inicio and t.inicio.replace(tzinfo=None) >= _dt.now()]
+    nombres_c = {c.id: c.nombre for c in db.query(models.Cliente).filter_by(tenant_id=tid).all()}
+    nombres_p = {p.id: p.nombre for p in db.query(models.UsuarioPersonal).filter_by(tenant_id=tid).all()}
+    nombres_s = {s.id: s.nombre for s in db.query(models.Servicio).filter_by(tenant_id=tid).all()}
+    agenda = [{"id": t.id, "hora": t.inicio.replace(tzinfo=None).strftime("%H:%M"),
+               "cliente": nombres_c.get(t.cliente_id, "?"), "profesional": nombres_p.get(t.profesional_id, "?"),
+               "servicio": nombres_s.get(t.servicio_id, "?"), "estado": t.estado} for t in de_hoy]
+    ahora = _dt.now()
+    sub = db.query(models.Turno.cliente_id).filter(
+        models.Turno.tenant_id == tid, models.Turno.inicio >= ahora,
+        models.Turno.estado.in_(["RESERVADO", "CONFIRMADO"])).subquery()
+    sin_turno_n = db.query(models.Cliente).filter(
+        models.Cliente.tenant_id == tid, ~models.Cliente.id.in_(sub)).count()
+    notif_n = db.query(models.Notificacion).filter_by(tenant_id=tid, estado="PENDIENTE").count()
+    prox = futuros[0] if futuros else None
+    datos = {"turnos_hoy": len(de_hoy), "atendidos_hoy": sum(1 for t in de_hoy if t.estado == "ATENDIDO"),
+             "por_confirmar": sum(1 for t in futuros if t.estado == "RESERVADO"),
+             "sin_turno_n": sin_turno_n, "notif_n": notif_n,
+             "proximo": (f"{nombres_c.get(prox.cliente_id, '?')} · "
+                         f"{prox.inicio.replace(tzinfo=None).strftime('%d/%m %H:%M')} · "
+                         f"{nombres_s.get(prox.servicio_id, '?')}") if prox else "Sin próximos turnos"}
+    return templates.TemplateResponse(request, "panel.html", {**shell(db, ctx), "datos": datos, "agenda": agenda})
 
 
 # --- Personal (ADMIN) ---
@@ -427,8 +457,12 @@ def turnos_post(request: Request, cliente_id: str = Form(...), profesional_id: s
         validar_no_solapamiento([(i, f) for i, f in ocupados], ini, fin)
     except ValueError as e:
         return RedirectResponse(f"/ui/turnos?error={e}", status_code=302)
-    db.add(models.Turno(tenant_id=tid, cliente_id=cliente_id, profesional_id=profesional_id,
-                        servicio_id=servicio_id, inicio=ini, fin=fin, canal="MOSTRADOR"))
+    nuevo = models.Turno(tenant_id=tid, cliente_id=cliente_id, profesional_id=profesional_id,
+                         servicio_id=servicio_id, inicio=ini, fin=fin, canal="MOSTRADOR")
+    db.add(nuevo)
+    db.commit()
+    db.refresh(nuevo)
+    programar_recordatorio(db, nuevo)
     db.commit()
     return RedirectResponse("/ui/turnos", status_code=302)
 
@@ -446,6 +480,7 @@ def turno_cancelar(request: Request, turno_id: str, motivo: str = Form(...), db:
         return RedirectResponse(f"/ui/turnos?error=No+se+puede+cancelar+un+turno+{t.estado}", status_code=302)
     t.estado = "CANCELADO"
     t.motivo_cancelacion = motivo.strip()
+    cancelar_recordatorios(db, t, f"Turno cancelado: {motivo.strip()}"[:255])
     db.commit()
     return RedirectResponse("/ui/turnos", status_code=302)
 
@@ -507,6 +542,7 @@ def turno_guardar(request: Request, turno_id: str, cliente_id: str = Form(...), 
         return RedirectResponse(err + str(e), status_code=302)
     t.cliente_id, t.profesional_id, t.servicio_id = cliente_id, profesional_id, servicio_id
     t.inicio, t.fin = ini, fin
+    programar_recordatorio(db, t)
     db.commit()
     return RedirectResponse("/ui/turnos", status_code=302)
 
@@ -528,6 +564,7 @@ def turno_atender(request: Request, turno_id: str, db: Session = Depends(get_db)
     cli = db.query(models.Cliente).filter_by(id=t.cliente_id, tenant_id=ctx["tenant_id"]).first()
     if cli:
         cli.n_visitas = (cli.n_visitas or 0) + 1
+    cancelar_recordatorios(db, t, "Turno atendido")
     db.commit()
     return RedirectResponse("/ui/turnos", status_code=302)
 
@@ -546,3 +583,50 @@ def turno_eliminar(request: Request, turno_id: str, db: Session = Depends(get_db
     db.delete(t)
     db.commit()
     return RedirectResponse("/ui/turnos", status_code=302)
+
+
+# --- Notificaciones (RF08) ---
+@router.get("/ui/notificaciones")
+def notif_get(request: Request, db: Session = Depends(get_db), error: str = ""):
+    from datetime import datetime as _dt
+    ctx, red = exigir(request, "ADMIN", "RECEPCION")
+    if red:
+        return red
+    set_rls_tenant(db, ctx["tenant_id"])
+    tid = ctx["tenant_id"]
+    rows = db.query(models.Notificacion).filter_by(tenant_id=tid).order_by(
+        models.Notificacion.programada_para).all()
+    nombres_c, nombres_s = {}, {}
+    for n in rows:
+        t = db.query(models.Turno).filter_by(id=n.turno_id, tenant_id=tid).first()
+        if t:
+            c = db.query(models.Cliente).filter_by(id=t.cliente_id, tenant_id=tid).first()
+            s = db.query(models.Servicio).filter_by(id=t.servicio_id, tenant_id=tid).first()
+            nombres_c[n.id] = (c.nombre if c else "?") + " · " + (
+                t.inicio.replace(tzinfo=None).strftime("%d/%m %H:%M") if t.inicio else "?")
+            nombres_s[n.id] = s.nombre if s else "?"
+    ahora = _dt.now()
+    filas = [{"id": n.id, "para": nombres_c.get(n.id, "?"), "servicio": nombres_s.get(n.id, "?"),
+              "programada": n.programada_para.replace(tzinfo=None).strftime("%d/%m %H:%M") if n.programada_para else "?",
+              "estado": n.estado, "canal": n.canal, "detalle": n.detalle or "",
+              "vencida": n.estado == "PENDIENTE" and n.programada_para
+              and n.programada_para.replace(tzinfo=None) < ahora} for n in rows]
+    return templates.TemplateResponse(request, "notificaciones.html",
+                                      {**shell(db, ctx), "filas": filas, "error": error})
+
+
+@router.post("/ui/notificaciones/{nid}/enviar")
+def notif_enviar(request: Request, nid: str, db: Session = Depends(get_db)):
+    ctx, red = exigir(request, "ADMIN", "RECEPCION")
+    if red:
+        return red
+    set_rls_tenant(db, ctx["tenant_id"])
+    n = db.query(models.Notificacion).filter_by(id=nid, tenant_id=ctx["tenant_id"]).first()
+    if not n:
+        return RedirectResponse("/ui/notificaciones?error=No+existe", status_code=302)
+    if n.estado != "PENDIENTE":
+        return RedirectResponse(f"/ui/notificaciones?error=Ya+esta+{n.estado}", status_code=302)
+    n.estado = "ENVIADA"
+    n.detalle = ((n.detalle or "") + " | Enviada desde el centro (demo)").strip(" |")[:255]
+    db.commit()
+    return RedirectResponse("/ui/notificaciones", status_code=302)

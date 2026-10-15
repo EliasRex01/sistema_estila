@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}Notificaciones · Estila{% endblock %}
+{% block contenido %}
+<div>
+  <h2>Notificaciones</h2>
+  <p class="sub">Recordatorios de turnos agendados (canal demo del futuro WhatsApp)</p>
+</div>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<table>
+<tr><th>Cliente · Turno</th><th>Servicio</th><th>Programada</th><th>Estado</th><th>Canal</th><th>Detalle</th><th></th></tr>
+{% for n in filas %}<tr{% if n.vencida %} style="background:#fff7ed"{% endif %}>
+<td>{{ n.para }}</td><td>{{ n.servicio }}</td><td>{{ n.programada }}</td><td>{{ n.estado }}</td><td>{{ n.canal }}</td><td>{{ n.detalle }}</td>
+<td>{% if n.estado == "PENDIENTE" %}<form method="post" action="/ui/notificaciones/{{ n.id }}/enviar" style="display:inline"> <button type="submit">Marcar enviada</button></form>{% endif %}</td></tr>{% endfor %}
+</table>
+<div class="pie-reporte">
+  <div></div>
+  <div class="paginacion"><div class="rango">{{ filas|length }} notificaciones</div></div>
+</div>
+{% endblock %}

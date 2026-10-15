@@ -48,7 +48,8 @@ END tenant_policy;
 BEGIN
   FOR t IN (SELECT table_name FROM user_tables WHERE table_name IN (
     'usuarios_personal', 'clientes', 'servicios', 'productos', 'turnos',
-    'ventas_cabecera', 'ventas_detalle', 'cajas', 'comisiones', 'auditoria'
+    'ventas_cabecera', 'ventas_detalle', 'cajas', 'comisiones', 'auditoria',
+    'notificaciones', 'chat_sesiones', 'chat_mensajes'
   )) LOOP
     BEGIN
       DBMS_RLS.DROP_POLICY(USER, t.table_name, 'TENANT_P');

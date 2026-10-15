@@ -35,7 +35,8 @@ try:
     check("conexion", db.execute(text("SELECT 1 FROM DUAL")).scalar() == 1)
 
     esperadas = {"usuarios_personal", "clientes", "servicios", "productos", "turnos",
-                 "ventas_cabecera", "ventas_detalle", "cajas", "comisiones", "auditoria"}
+                 "ventas_cabecera", "ventas_detalle", "cajas", "comisiones", "auditoria",
+                 "notificaciones", "chat_sesiones", "chat_mensajes"}
     con_politica = {r[0].lower() for r in
                     db.execute(text("SELECT object_name FROM user_policies WHERE policy_name = 'TENANT_P'"))}
     faltan = esperadas - con_politica

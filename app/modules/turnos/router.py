@@ -6,6 +6,7 @@ from app.db import models
 from app.db.session import get_db, set_rls_tenant
 from app.modules.turnos.schemas import TurnoCancelar, TurnoCreate, TurnoOut, TurnoUpdate
 from app.modules.turnos.service import calcular_fin, validar_no_solapamiento
+from app.modules.notificaciones.service import cancelar_recordatorios, programar_recordatorio
 
 router = APIRouter(prefix="/turnos", tags=["turnos"])
 ESTADOS_ACTIVOS = ["RESERVADO", "CONFIRMADO", "BLOQUEADO"]
@@ -47,6 +48,8 @@ def crear(body: TurnoCreate, db: Session = Depends(get_db), ctx: dict = Depends(
     db.add(t)
     db.commit()
     db.refresh(t)
+    programar_recordatorio(db, t)
+    db.commit()
     return _out(t)
 
 
@@ -71,6 +74,7 @@ def cancelar(turno_id: str, body: TurnoCancelar, db: Session = Depends(get_db),
         raise HTTPException(409, f"No se puede cancelar un turno {t.estado}")
     t.estado = "CANCELADO"
     t.motivo_cancelacion = body.motivo
+    cancelar_recordatorios(db, t, f"Turno cancelado: {body.motivo}"[:255])
     db.commit()
     db.refresh(t)
     return _out(t)
@@ -107,6 +111,7 @@ def reprogramar(turno_id: str, body: TurnoUpdate, db: Session = Depends(get_db),
         raise HTTPException(409, str(e))
     t.cliente_id, t.profesional_id, t.servicio_id = body.cliente_id, body.profesional_id, body.servicio_id
     t.inicio, t.fin = body.inicio, fin
+    programar_recordatorio(db, t)
     db.commit()
     db.refresh(t)
     return _out(t)
@@ -128,6 +133,7 @@ def atender(turno_id: str, db: Session = Depends(get_db),
     cli = db.query(models.Cliente).filter_by(id=t.cliente_id, tenant_id=ctx["tenant_id"]).first()
     if cli:
         cli.n_visitas = (cli.n_visitas or 0) + 1
+    cancelar_recordatorios(db, t, "Turno atendido")
     db.commit()
     db.refresh(t)
     return _out(t)

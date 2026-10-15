@@ -25,6 +25,59 @@
     <main>{% block contenido %}{% endblock %}</main>
   </div>
 </div>
+{% if usuario %}
+<button id="chat-burbuja" title="Asistente Estila" onclick="var p=document.getElementById('chat-panel');p.style.display=(p.style.display==='none'?'flex':'none');if(p.style.display!=='none'){cargarHistorial();}">💬</button>
+<div id="chat-panel" style="display:none">
+  <div id="chat-cabecera">Asistente Estila <span class="etiqueta">demo WhatsApp</span></div>
+  <div id="chat-msgs"></div>
+  <form id="chat-form" onsubmit="return enviarChat();">
+    <input id="chat-text" placeholder="Escribí tu mensaje..." autocomplete="off">
+    <button type="submit">➤</button>
+  </form>
+</div>
+<script>
+function chatCid() {
+  var c = localStorage.getItem('estila_cid');
+  if (!c) { c = Math.random().toString(36).slice(2); localStorage.setItem('estila_cid', c); }
+  return c;
+}
+function chatAgrega(rol, texto) {
+  var box = document.getElementById('chat-msgs');
+  var d = document.createElement('div');
+  d.className = 'chat-' + rol;
+  d.textContent = texto;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+function cargarHistorial() {
+  var box = document.getElementById('chat-msgs');
+  if (box.childNodes.length) return;
+  fetch('/chat/historial?cid=' + encodeURIComponent(chatCid())).then(function (r) { return r.json(); }).then(function (j) {
+    var ms = j.mensajes || [];
+    if (!ms.length) { primerHola(); return; }
+    ms.forEach(function (m) { chatAgrega(m.rol === 'bot' ? 'bot' : 'yo', m.texto); });
+  });
+}
+function primerHola() {
+  fetch('/chat/mensaje', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cid: chatCid(), texto: 'hola' }) }).then(function (r) { return r.json(); }).then(function (j) {
+    chatAgrega('bot', j.respuesta);
+  });
+}
+function enviarChat() {
+  var inp = document.getElementById('chat-text');
+  var t = inp.value;
+  if (!t.trim()) return false;
+  inp.value = '';
+  chatAgrega('yo', t);
+  fetch('/chat/mensaje', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cid: chatCid(), texto: t }) }).then(function (r) { return r.json(); }).then(function (j) {
+    chatAgrega('bot', j.respuesta);
+  });
+  return false;
+}
+</script>
+{% endif %}
 </body>
 {% else %}
 <body class="login-fondo">

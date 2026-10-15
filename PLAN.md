@@ -11,6 +11,8 @@
 - [x] Reglas: antisolape 409, email global unico, ultimo ADMIN, baja logica,
   borrado condicional, profesional inactivo sin turnos
 - [x] Web con login por cookie y menu por rol + tema empresarial + `/docs` API
+- [x] Panel real de peluquería: agenda del día, próximo turno, contadores
+- [x] Chatbot demo + centro de notificaciones (base de RF07/RF08; canal real en Fase 2)
 - [x] Migración a Oracle: driver, VPD (`adb_setup_admin.sql`, `vpd_oracle.sql`),
   `probar_oracle.py`, `DEPLOY_ORACLE.md`, `DEPLOY_VERCEL.md`
 - [x] Soporte Vercel (Mangum) y repo GitHub público

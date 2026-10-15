@@ -24,7 +24,9 @@ def menu_para(rol: str) -> list[tuple[str, str]]:
             ("Servicios", "/ui/servicios"),
             ("Turnos", "/ui/turnos"),
             ("Sin turno", "/ui/clientes/sin-turno"),
+            ("Notificaciones", "/ui/notificaciones"),
         ]
     if rol == "RECEPCION":
-        return [("Turnos", "/ui/turnos"), ("Clientes", "/ui/clientes"), ("Sin turno", "/ui/clientes/sin-turno")]
+        return [("Turnos", "/ui/turnos"), ("Clientes", "/ui/clientes"), ("Sin turno", "/ui/clientes/sin-turno"),
+                ("Notificaciones", "/ui/notificaciones")]
     return [("Mi agenda", "/ui/turnos"), ("Servicios", "/ui/servicios")]

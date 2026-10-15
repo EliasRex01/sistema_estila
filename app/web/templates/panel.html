@@ -3,6 +3,37 @@
 {% block contenido %}
 <h2>Panel principal</h2>
 <p class="sub">{{ usuario.nombre }} · Rol: <b>{{ ctx.rol }}</b> · {{ tenant_nombre }}</p>
+
+<div class="tarjetas">
+  <div class="tarjeta"><h3>{{ datos.turnos_hoy }}</h3><p>Turnos hoy</p></div>
+  <div class="tarjeta"><h3>{{ datos.atendidos_hoy }}</h3><p>Atendidos hoy</p></div>
+  <div class="tarjeta"><h3>{{ datos.por_confirmar }}</h3><p>Por confirmar</p></div>
+  <div class="tarjeta"><h3>{{ datos.sin_turno_n }}</h3><p>Clientes sin turno</p></div>
+  <div class="tarjeta"><h3>{{ datos.notif_n }}</h3><p>Recordatorios pendientes</p></div>
+</div>
+
+<h3>Próximo turno</h3>
+<p><b>{{ datos.proximo }}</b></p>
+
+<h3>Agenda de hoy</h3>
+{% if agenda %}
+<table>
+<tr><th>Hora</th><th>Cliente</th><th>Profesional</th><th>Servicio</th><th>Estado</th><th></th></tr>
+{% for t in agenda %}<tr>
+  <td>{{ t.hora }}</td><td>{{ t.cliente }}</td><td>{{ t.profesional }}</td><td>{{ t.servicio }}</td><td>{{ t.estado }}</td>
+  <td>{% if t.estado in ["RESERVADO", "CONFIRMADO"] %}
+    <form method="post" action="/ui/turnos/{{ t.id }}/atender" style="display:inline"> <button type="submit">Atendido</button></form>
+    {% if ctx.rol in ["ADMIN", "RECEPCION"] %}
+    <form method="post" action="/ui/turnos/{{ t.id }}/cancelar" style="display:inline">
+      <input name="motivo" placeholder="Motivo" required size="12">
+      <button type="submit" class="btn-peligro">Cancelar</button>
+    </form>{% endif %}{% endif %}</td>
+</tr>{% endfor %}
+</table>
+{% else %}
+<p class="sub">Sin turnos para hoy.</p>
+{% endif %}
+
 <h3>Mis opciones</h3>
 <div class="tarjetas">
   {% for nombre, url in menu %}
